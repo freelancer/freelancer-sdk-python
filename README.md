@@ -35,7 +35,8 @@ demonstrating using the SDK functions.
 
 ### Examples
 
-Please see `samples`.
+Please see `samples`. The API documentation is also
+[available](http://freelancercom-python-sdk.readthedocs.org/en/latest/).
 
 ### Overview of the source
 
