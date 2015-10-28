@@ -7,7 +7,10 @@ Python 2.7 and Python 3 (3.4+).
 ### Install
 
 Install it using `pip install freelancersdk` or by running `python
-setup.py install` from a clone of the source tree.
+setup.py install` from a clone of the source tree. It may be a good
+idea to use
+[virtualenv](https://virtualenv.readthedocs.org/en/latest/) as part of
+your workflow.
 
 ### Usage
 
