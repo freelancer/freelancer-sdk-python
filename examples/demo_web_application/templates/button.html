@@ -1,0 +1,187 @@
+<link href='http://fonts.googleapis.com/css?family=Bungee' rel='stylesheet' type='text/css'>
+
+<div style="font-family: Bungee;font-size: 80px; margin-top: 50px">BEER WARS</div>
+    
+<a class="button" onclick="order()" style="margin-top: 18vh">
+    <span><div style="margin-top: 165px">USE THE FORCE</div></span>
+</a>
+<div style="margin-top: 20px">
+    <span style="font-family: Bungee" id="status"></span>
+</div>
+<div>
+    <span style="font-family: Bungee; font-size: 12px" id="sub_status"></span>
+</div>
+<div id="pay"></div>
+<div id="bidders" style="margin-top: 10px"></div>
+
+<input id="clicks" type="hidden" value="0">
+<input id="project_id" type="hidden" value="">
+<input id="milestone_id" type="hidden" value="">
+<input id="awarded" type="hidden" value="">
+<input id="intervalWatcher" type="hidden" value="">
+
+<style>
+body {
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    margin: 10px;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -webkit-box-shadow:    0 8px 0 #5e0326, 0 15px 20px rgba(0, 0, 0, .35);
+    -moz-box-shadow: 0 8px 0 #5e0326, 0 15px 20px rgba(0, 0, 0, .35);
+    box-shadow: 0 8px 0 #5e0326, 0 15px 20px rgba(0, 0, 0, .35);
+    -webkit-transition: -webkit-box-shadow .1s ease-in-out;
+    -moz-transition: -moz-box-shadow .1s ease-in-out;
+    -o-transition: -o-box-shadow .1s ease-in-out;
+    transition: box-shadow .1s ease-in-out;
+    font-size: 50px;
+    color: #fff;
+}
+
+.button span {
+    display: inline-block;
+    padding: 20px 30px;
+    background-color: #000000;
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(hsla(338, 90%, 80%, .8)), to(hsla(338, 90%, 70%, .2)));
+    background-image: -webkit-linear-gradient(rgb(73, 73, 73), hsla(338, 90%, 70%, .2));
+    background-image: -moz-linear-gradient(hsla(338, 90%, 80%, .8), hsla(338, 90%, 70%, .2));
+    background-image: -o-linear-gradient(hsla(338, 90%, 80%, .8), hsla(338, 90%, 70%, .2));
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -webkit-box-shadow: inset 0 -1px 1px rgba(255, 255, 255, .15);
+    -moz-box-shadow: inset 0 -1px 1px rgba(255, 255, 255, .15);
+    box-shadow: inset 0 -1px 1px rgba(255, 255, 255, .15);
+    font-family: 'Bungee', Arial, sans-serif;
+    line-height: 1;
+    text-shadow: 0 -1px 1px rgba(175, 49, 95, .7);
+    -webkit-transition: background-color .2s ease-in-out, -webkit-transform .1s ease-in-out;
+    -moz-transition: background-color .2s ease-in-out, -moz-transform .1s ease-in-out;
+    -o-transition: background-color .2s ease-in-out, -o-transform .1s ease-in-out;
+    transition: background-color .2s ease-in-out, transform .1s ease-in-out;
+    width: 400px;
+    height: 400px;
+    margin: 0;
+}
+
+.button:hover span {
+    background-color: rgb(73, 73, 73);
+    text-shadow: 0 -1px 1px rgba(175, 49, 95, .9), 0 0 5px rgba(255, 255, 255, .8);
+}
+
+.button:active, .button:focus {
+    -webkit-box-shadow:    0 8px 0 #c5376d, 0 12px 10px rgba(0, 0, 0, .3);
+    -moz-box-shadow: 0 8px 0 #c5376d, 0 12px 10px rgba(0, 0, 0, .3);
+    box-shadow:    0 8px 0 #c5376d, 0 12px 10px rgba(0, 0, 0, .3);
+}
+
+.button:active span {
+    -webkit-transform: translate(0, 4px);
+    -moz-transform: translate(0, 4px);
+    -o-transform: translate(0, 4px);
+    transform: translate(0, 4px);
+}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    function order(){
+        if (document.getElementById("clicks").value > 0){
+            return
+        }
+        document.getElementById("clicks").value = 1;
+        document.getElementById("status").innerHTML = "PREPARING ORDER..."
+        $.ajax({
+            type: "POST",
+            url: "/create_project",
+            data: JSON.stringify({
+                title: "Get me a beer.",
+                description: "Get me a beer.",
+                min_budget: 5,
+                max_budget: 25,
+                budget_currency: '',
+                currency: '',
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function (data){
+                console.log(data);
+                document.getElementById("status").innerHTML = "TRANSMITTING "
+                 + "<a href='https://freelancer-sandbox.com/projects/" + data["result"]["seo_url"]+"'>ORDER</a>..."
+                
+                document.getElementById('project_id').value = data["result"]["id"];
+                document.getElementById('intervalWatcher').value = window.setInterval(checkBids, 30*1000, data["result"]["id"]);
+            },
+            error: function (data){
+                console.log(data);
+                document.getElementById("status").innerHTML = "Something went wrong with the force.";
+                document.getElementById("sub_status").innerHTML = "(Seriously though, check your Midi-chlorian count (Freelancer balance) and try again).";
+            }
+        });
+        // document.getElementById("status").innerHTML = "STORMTROOPER ACCEPTED THE ORDER..."
+        // document.getElementById("status").innerHTML = "EXECUTING ORDER 66..."
+    }
+
+    function checkBids(project_id){
+        $.ajax({
+            type: "GET",
+            url: "/project/" + project_id + "/bids",
+            success: function (data){
+                console.log(data);
+                if (data["result"]["bids"].length > 0){
+                    document.getElementById("status").innerHTML = "STORMTROOPERS ARE RECEIVING THE ORDER...";
+                    document.getElementById("sub_status").innerHTML = "Choose a storm trooper to execute the order...";
+                }
+                var str = '';
+                var awarded = document.getElementById('awarded').value;
+                for (var i=0; i < data["result"]["bids"].length; i++){
+                    if (!awarded || data["result"]["bids"][i]["id"] == awarded){
+                        str += '<img src="http://onstarwars.com/wp-content/uploads/2015/04/Star-Wars-Clone-Soldier-Cute-Cartoon-Decal-Vinyl-Car-Wall-Laptop-Cellphone-Sticker-0-128x128.jpg" onClick="executeOrder(' + data["result"]["bids"][i]["id"] + ')"><div id="bid_id_' + data["result"]["bids"][i]["id"] + '">$' + data["result"]["bids"][i]["amount"] + '</div>'
+                    }
+                }
+                document.getElementById("bidders").innerHTML = str;
+            }
+        });
+    }
+
+    function executeOrder(bid_id){
+        $.ajax({
+            type: "PUT",
+            url: "/award/" + String(bid_id),
+            success: function (data){
+                document.getElementById('bid_id_'+String(bid_id)).innerHTML+= ' (AWARDED)';
+                document.getElementById('awarded').value = bid_id;
+                window.clearInterval(document.getElementById('intervalWatcher').value);
+                $.ajax({
+                    type: "POST",
+                    url: "/create_milestone",
+                    data: JSON.stringify({
+                        "bid_id": bid_id
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data){
+                        document.getElementById('pay').innerHTML = '<button onclick="pay('+data["result"]["transaction_id"]+','+data["result"]["amount"]+')">PAY</button>'
+                        console.log(data);
+                    }
+                });
+            }
+        });
+    }
+
+    function pay(transaction_id, amount) {
+        $.ajax({
+            type: "PUT",
+            url: "/pay/" + String(transaction_id),
+            data: JSON.stringify({
+                "amount": amount
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function (data){
+                console.log(data);
+            }
+        });
+    }
+</script>

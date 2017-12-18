@@ -204,15 +204,17 @@ def place_project_bid(session, project_id, bidder_id, description, amount,
                                     error_code=json_data['error_code'])
 
 
-def get_bids(session, project_ids, limit, offset):
+def get_bids(session, project_ids=[], bid_ids=[], limit=10, offset=0):
     """
     Get the list of bids
     """
-    get_bids_data = {
-        'projects[]': project_ids,
-        'limit': limit,
-        'offset': offset,
-    }
+    get_bids_data = {}
+    if bid_ids:
+        get_bids_data['bids[]'] = bid_ids
+    if project_ids:
+        get_bids_data['project_ids[]'] = project_ids
+    get_bids_data['limit'] = limit
+    get_bids_data['offset'] = offset
     # GET /api/projects/0.1/bids/
     response = make_get_request(session, 'bids', params_data=get_bids_data)
     json_data = response.json()

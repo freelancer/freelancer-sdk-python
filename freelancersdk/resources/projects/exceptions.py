@@ -25,12 +25,12 @@ class BidsNotFoundException(Exception):
         self.error_code = error_code
 
 
-class BidNotAwaredException(Exception):
+class BidNotAwardedException(Exception):
     """
     Bid could not be awarded
     """
     def __init__(self, message, error_code):
-        super(BidNotAwaredException, self).__init__(message)
+        super(BidNotAwardedException, self).__init__(message)
         self.error_code = error_code
 
 

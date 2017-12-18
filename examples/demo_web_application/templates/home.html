@@ -1,0 +1,15 @@
+{% if session['Authorization'] %}
+<li>You're logged in!</li>
+<button onclick="logout()">Logout</button>
+{%else%}
+<button onclick="login()">Login with Freelancer</button>
+{% endif %}
+
+<script>
+    function login(){
+        window.open("/auth"); 
+    }
+    function logout(){
+        window.open("/logout");
+    }
+</script>

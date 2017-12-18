@@ -1,0 +1,42 @@
+<p>title</p>
+<input id="title"></input>
+<p>description</p>
+<input id="description"></input>
+<p>min budget</p>
+<input type="number" id="min_budget"></input>
+<p>max budget</p>
+<input type="number" id="max_budget"></input>
+<p>If you don't want to specify it, currency can be derived from the user's timezone</p>
+<p>budget currency</p>
+<input id="budget_currency"></input>
+<p>payable currencies</p>
+<input id="currency"></input>
+<p>(Skill is hardcoded (delivery))</p>
+<p>Location</p>
+<input id="location"></input
+<button onclick="submit()">Create</button>
+<span id="result"></span>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    function submit(){
+        $.ajax({
+            type: "POST",
+            url: "/create_project",
+            data: JSON.stringify({
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                min_budget: parseFloat(document.getElementById("min_budget").value),
+                max_budget: parseFloat(document.getElementById("max_budget").value),
+                budget_currency: document.getElementById("budget_currency").value,
+                currency: document.getElementById("currency").value,
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function (data){
+                console.log(data);    
+                document.getElementById("result").innerHTML = 
+                "<a href=https://freelancer-sandbox.com/projects/" + data["result"]["seo_url"] + ">Job created! click here to view.</a>";
+            }
+        });
+    }
+</script>

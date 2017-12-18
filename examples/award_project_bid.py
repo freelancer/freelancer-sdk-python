@@ -1,6 +1,6 @@
 from freelancersdk.session import Session
 from freelancersdk.resources.projects import award_project_bid
-from freelancersdk.exceptions import BidNotAwaredException
+from freelancersdk.exceptions import BidNotAwardedException
 import os
 
 
@@ -16,7 +16,7 @@ def sample_award_project_bid():
 
     try:
         return award_project_bid(session, **bid_data)
-    except BidNotAwaredException as e:
+    except BidNotAwardedException as e:
         print(('Error message: %s' % e.message))
         print(('Error code: %s' % e.error_code))
         return None

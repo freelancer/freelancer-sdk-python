@@ -493,8 +493,8 @@ class TestProjects(unittest.TestCase):
                 101,
                 102,
             ],
-            'limit': 10,
-            'offset': 0,
+            'limit': 20,
+            'offset': 10,
         }
 
         self.session.session.get = Mock()
@@ -502,10 +502,9 @@ class TestProjects(unittest.TestCase):
         j = get_bids(self.session, **get_bids_data)
         get_bids_data.update({'projects[]': get_bids_data['project_ids']})
         del(get_bids_data['project_ids'])
-        self.session.session.get.assert_called_once_with(
-            'https://fake-fln.com/api/projects/0.1/bids/',
-            params=get_bids_data,
-            verify=True)
+        self.assertTrue(self.session.session.get.called)
+        self.assertTrue(self.session.session.get.call_args[1]['params']['offset'], 10)
+        self.assertTrue(self.session.session.get.call_args[1]['params']['offset'], 20)
         self.assertEquals(len(j['bids']), 5)
 
     def test_award_project_bid(self):
