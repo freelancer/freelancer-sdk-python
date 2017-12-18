@@ -21,10 +21,10 @@ part of your workflow.
 Versioning
 ----------
 
-The current version of the library is ``0.1.3`` which corresponds to the
-``0.1`` version of the API. The revision number ``3`` corresponds to the
+The current version `series` of the library is ``0.1.x`` which corresponds to the
+``0.1`` version of the API. The revision number ``x`` corresponds to the
 revision of the SDK. The ``0.1`` series of the library will continue to
-support (in a backward compatible) way the ``0.1`` version of the
+support (in a backward compatible way) the ``0.1`` version of the
 Freelancer.com API.
 
 Usage
