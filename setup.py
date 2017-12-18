@@ -11,7 +11,7 @@ dependencies = [
 if sys.version_info < (3, 4):
     dependencies.append('enum34')
 
-with open('README.rst') as file:
+with open('PYPI_DESCRIPTION.rst') as file:
     long_description = file.read()
 
 setuptools.setup(
@@ -19,7 +19,7 @@ setuptools.setup(
     author='Freelancer.com',
     url='https://github.com/freelancer/freelancer-sdk-python',
     author_email='api-support@freelancer.com',
-    version='0.1.5',
+    version='0.1.6',
     description='Offical Freelancer.com SDK',
     long_description=long_description,
     classifiers=[
