@@ -49,7 +49,7 @@ All the examples below recognizes two environment variables:
    must be specified
 -  ``FLN_URL``: If you want to use the library to make requests against
    the `Freelancer.com
-   Sandbox <https://developers.fln.flnltd.com/docs/api-overview/sandbox-environment>`__,
+   Sandbox <https://developers.freelaner.com/docs/api-overview/sandbox-environment>`__,
    you can specifiy ``FLN_URL=https://www.freelancer-sandbox.com``. If
    not specified, it defaults to ``https://www.freelancer.com``.
 
