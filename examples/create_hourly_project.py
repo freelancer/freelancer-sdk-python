@@ -20,7 +20,7 @@ def sample_create_hourly_project():
         'description': 'description',
         'currency': create_currency_object(id=1),
         'budget': create_budget_object(minimum=10),
-        'jobs': (create_job_object(id=7)),
+        'jobs': [create_job_object(id=7)],
         'hourly_project_info':
             create_hourly_project_info_object(40, 'WEEK', 'ONE_TO_FOUR_WEEKS')
     }

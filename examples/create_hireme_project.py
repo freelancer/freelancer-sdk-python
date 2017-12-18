@@ -20,7 +20,7 @@ def sample_create_hireme_project():
         'description': 'description',
         'currency': create_currency_object(id=1),
         'budget': create_budget_object(minimum=10),
-        'jobs': (create_job_object(id=7)),
+        'jobs': [create_job_object(id=7)],
         'hireme_initial_bid':
             create_bid_object(id=None,  # No bid id yet
                               bidder_id=2,  # Freelancer we want to hire

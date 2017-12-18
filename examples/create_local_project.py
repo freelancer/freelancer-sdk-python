@@ -21,7 +21,7 @@ def sample_create_local_project():
         'description': 'description',
         'currency': create_currency_object(id=1),
         'budget': create_budget_object(minimum=10),
-        'jobs': (create_job_object(id=649)),  # Must be a local job
+        'jobs': [create_job_object(id=649)],  # Must be a local job
         'location': create_location_object(create_country_object('Australia'),
                                            'Sydney', -33.875461, 151.201678)
     }
