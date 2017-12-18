@@ -1,6 +1,10 @@
 Python library for Freelancer.com API
 =====================================
 
+.. image:: https://badge.fury.io/py/freelancersdk.svg
+    :target: https://badge.fury.io/py/freelancersdk
+
+
 This is a Python library for the `Freelancer.com
 API <https://developers.freelancer.com>`__. Using this, you can interact
 with Freelancer.com from your Python applications. It supports Python
