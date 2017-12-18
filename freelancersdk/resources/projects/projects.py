@@ -7,7 +7,7 @@ from freelancersdk.resources.projects.types import (
 )
 from freelancersdk.resources.projects.exceptions import (
     ProjectNotCreatedException, ProjectsNotFoundException,
-    BidNotPlacedException, BidsNotFoundException, BidNotAwaredException,
+    BidNotPlacedException, BidsNotFoundException, BidNotAwardedException,
     BidNotRevokedException, BidNotAcceptedException, BidNotRetractedException,
     BidNotHighlightedException,
     MilestoneNotCreatedException, MilestoneNotReleasedException,
@@ -244,7 +244,7 @@ def award_project_bid(session, bid_id):
         return json_data['status']
     else:
         json_data = response.json()
-        raise BidNotAwaredException(message=json_data['message'],
+        raise BidNotAwardedException(message=json_data['message'],
                                     error_code=json_data['error_code'])
 
 
