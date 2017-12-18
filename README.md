@@ -42,7 +42,7 @@ All the examples below recognizes two environment variables:
 
 - `FLN_OAUTH_TOKEN`: The OAuth2 token to create the session with and must be specified
 - `FLN_URL`: If you want to use the library to make requests against the 
-   [Freelancer.com Sandbox](https://developers.fln.flnltd.com/docs/api-overview/sandbox-environment),
+   [Freelancer.com Sandbox](https://developers.freelancer.com/docs/api-overview/sandbox-environment),
    you can specifiy `FLN_URL=https://www.freelancer-sandbox.com`. If not specified, it defaults to
    `https://www.freelancer.com`.
 
