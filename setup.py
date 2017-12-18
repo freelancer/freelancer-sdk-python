@@ -11,14 +11,17 @@ dependencies = [
 if sys.version_info < (3, 4):
     dependencies.append('enum34')
 
+with open('README.rst') as file:
+    long_description = file.read()
+
 setuptools.setup(
     name='freelancersdk',
     author='Freelancer.com',
     url='https://github.com/freelancer/freelancer-sdk-python',
     author_email='api-support@freelancer.com',
-    version='0.1.3',
-    description='Freelancer.com SDK',
-    long_description='Freelancer.com SDK',
+    version='0.1.4',
+    description='Offical Freelancer.com SDK',
+    long_description=long_description,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Software Development",
