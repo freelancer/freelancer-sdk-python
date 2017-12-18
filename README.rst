@@ -30,7 +30,7 @@ Freelancer.com API.
 Usage
 ~~~~~
 
-The first step to using any SDK function is to create a object:
+The first step to using any SDK function is to create a `Session` object:
 
 ::
 
