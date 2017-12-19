@@ -212,7 +212,7 @@ def get_bids(session, project_ids=[], bid_ids=[], limit=10, offset=0):
     if bid_ids:
         get_bids_data['bids[]'] = bid_ids
     if project_ids:
-        get_bids_data['project_ids[]'] = project_ids
+        get_bids_data['projects[]'] = project_ids
     get_bids_data['limit'] = limit
     get_bids_data['offset'] = offset
     # GET /api/projects/0.1/bids/
