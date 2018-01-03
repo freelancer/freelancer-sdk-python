@@ -121,8 +121,6 @@ body {
                 document.getElementById("sub_status").innerHTML = "(Seriously though, check your Midi-chlorian count (Freelancer balance) and try again).";
             }
         });
-        // document.getElementById("status").innerHTML = "STORMTROOPER ACCEPTED THE ORDER..."
-        // document.getElementById("status").innerHTML = "EXECUTING ORDER 66..."
     }
 
     function checkBids(project_id){
@@ -139,7 +137,7 @@ body {
                 var awarded = document.getElementById('awarded').value;
                 for (var i=0; i < data["result"]["bids"].length; i++){
                     if (!awarded || data["result"]["bids"][i]["id"] == awarded){
-                        str += '<img src="http://onstarwars.com/wp-content/uploads/2015/04/Star-Wars-Clone-Soldier-Cute-Cartoon-Decal-Vinyl-Car-Wall-Laptop-Cellphone-Sticker-0-128x128.jpg" onClick="executeOrder(' + data["result"]["bids"][i]["id"] + ')"><div id="bid_id_' + data["result"]["bids"][i]["id"] + '">$' + data["result"]["bids"][i]["amount"] + '</div>'
+                        str += '<input type="image" class="stormtrooper" src="http://onstarwars.com/wp-content/uploads/2015/04/Star-Wars-Clone-Soldier-Cute-Cartoon-Decal-Vinyl-Car-Wall-Laptop-Cellphone-Sticker-0-128x128.jpg" onClick="awardAndCreateMilestone(' + data["result"]["bids"][i]["id"] + ')"><div id="bid_id_' + data["result"]["bids"][i]["id"] + '">$' + data["result"]["bids"][i]["amount"] + '</div>'
                     }
                 }
                 document.getElementById("bidders").innerHTML = str;
@@ -147,12 +145,15 @@ body {
         });
     }
 
-    function executeOrder(bid_id){
+    function awardAndCreateMilestone(bid_id){
+        $(function(){
+            $("input.stormtrooper").attr("disabled", true);
+        });
         $.ajax({
             type: "PUT",
             url: "/award/" + String(bid_id),
             success: function (data){
-                document.getElementById('bid_id_'+String(bid_id)).innerHTML+= ' (AWARDED)';
+                document.getElementById('bid_id_'+String(bid_id)).innerHTML += ' (AWARDED)';
                 document.getElementById('awarded').value = bid_id;
                 window.clearInterval(document.getElementById('intervalWatcher').value);
                 $.ajax({
@@ -163,8 +164,10 @@ body {
                     }),
                     contentType: "application/json; charset=utf-8",
                     success: function (data){
-                        document.getElementById('pay').innerHTML = '<button onclick="pay('+data["result"]["transaction_id"]+','+data["result"]["amount"]+')">PAY</button>'
                         console.log(data);
+                        document.getElementById("status").innerHTML = "WAITING FOR STORMTROOPER TO ACCEPT THE ORDER...";
+                        document.getElementById("sub_status").innerHTML = "";
+                        document.getElementById('intervalWatcher').value = window.setInterval(checkProjectStatus, 30*1000, document.getElementById('project_id').value, data["result"]["transaction_id"], data["result"]["amount"]);
                     }
                 });
             }
@@ -172,6 +175,7 @@ body {
     }
 
     function pay(transaction_id, amount) {
+        $('#pay').hide();
         $.ajax({
             type: "PUT",
             url: "/pay/" + String(transaction_id),
@@ -181,6 +185,24 @@ body {
             contentType: "application/json; charset=utf-8",
             success: function (data){
                 console.log(data);
+                document.getElementById("status").innerHTML = "THE JEDI ORDER IS NO MORE.";
+                document.getElementById("sub_status").innerHTML = "THE LOYAL STORMTROOPER HAS BEEN PAID.";
+            }
+        });
+    }
+
+    function checkProjectStatus(project_id, transaction_id, amount){
+        $.ajax({
+            type: "GET",
+            url: "/project/" + project_id,
+            success: function (data){
+                console.log(data);
+                if (data["projects"][0]["sub_status"] == "closed_awarded"){
+                    window.clearInterval(document.getElementById('intervalWatcher').value);
+                    document.getElementById('pay').innerHTML = '<button onclick="pay('+transaction_id+','+amount+')">PAY STORMTROOPER</button>'                    
+                    document.getElementById("status").innerHTML = "STORMTROOPER ACCEPTED THE ORDER...";
+                    document.getElementById("sub_status").innerHTML = "Executing order 66...";
+                }
             }
         });
     }

@@ -1,5 +1,6 @@
 from flask import Flask, redirect, request, jsonify, render_template, session
-from models import db, User
+from sqlalchemy import or_
+from models import app, db, User, Project
 from functools import wraps
 import requests
 import json
@@ -9,16 +10,13 @@ from freelancersdk.resources.projects import (
     create_local_project, create_country_object, create_location_object,
     create_job_object, create_budget_object, award_project_bid,
     create_milestone_payment, release_milestone_payment,create_currency_object,
-    get_bids,
+    get_bids, create_get_projects_object, get_projects
 )
 from freelancersdk.exceptions import (
     ProjectNotCreatedException, BidsNotFoundException,
     BidNotAwardedException, MilestoneNotCreatedException,
-    MilestoneNotReleasedException,
+    MilestoneNotReleasedException, ProjectsNotFoundException,
 )
-app = Flask(__name__)
-app.config.from_pyfile('config.py')
-db.init_app(app)
 base_url = app.config['BASE_URL']
 base_accounts_url = app.config['BASE_ACCOUNTS_URL']
 client_id = app.config['CLIENT_ID']
@@ -31,11 +29,17 @@ def authenticated(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         global h
+        # if token not set
         if not h["Freelancer-OAuth-V1"]:
-            if 'Authorization' in session:
-                h["Freelancer-OAuth-V1"] = session['Authorization']
-        if db.session.query(User).filter(User.access_token == h["Freelancer-OAuth-V1"]).count() == 0:
-            return auth()
+            # set it to session token (if it exists)
+            if 'Authorization' in session and 'name' in session:
+                u = User.query.filter_by(access_token=session["Authorization"], name=session["name"]).first()
+                if (not u):
+                    return auth()
+                else:
+                    h["Freelancer-OAuth-V1"] = u.access_token
+            else:
+                return logout()
         return f(*args, **kwargs)
     return decorated
 # Authorise a user
@@ -53,10 +57,9 @@ def auth():
 # This is the endpoint that catches the returned data from your Freelancer App.
 @app.route('/auth_redirect')
 def handle_redirect():
-    authorisation_code = request.args['code']
     payload = {
         'grant_type': 'authorization_code',
-        'code': authorisation_code,
+        'code': request.args['code'],
         'client_id': client_id,
         'client_secret': client_secret,
         'redirect_uri': 'http://127.0.0.1:5000/auth_redirect', 
@@ -65,15 +68,22 @@ def handle_redirect():
     h = {"Freelancer-OAuth-V1": response["access_token"]}
     url = base_url + "/api/users/0.1/self/"
     details = requests.get(url, headers=h).json()
-    user = User(details['result']['username'], details["result"]['email'], response['access_token'], response['refresh_token'])	
-    db.session.add(user)
-    db.session.commit()
     session['Authorization'] = response['access_token']
+    session['name'] = details['result']['username']
+    user = User.query.filter_by(name=session["name"]).first()
+    if not user:
+        user = User(details['result']['username'], details["result"]['email'], response['access_token'], response['refresh_token'])	
+        db.session.add(user)
+    else:
+        user.access_token = response['access_token']
+        user.refresh_token = response['refresh_token']
+    db.session.commit()
     return render_template("user.html", user=user)
 # Unauthenticate the user
 @app.route('/logout')
 def logout():
     session.pop('Authorization', None)
+    session.pop('name', None)
     return render_template("home.html")
 # A sample route protected by authentication
 @app.route('/behindauth')
@@ -106,7 +116,6 @@ def post_project():
     result = None
         
     try:
-        
         # TODO: Make this an app level attribute instead    
         s = Session(oauth_token=h["Freelancer-OAuth-V1"], url=base_url)
         result = create_local_project(s, **data)
@@ -115,6 +124,10 @@ def post_project():
         print(('Error code: %s' % e.error_code))
         return jsonify(result)
     else:
+        user_id = User.query.filter_by(name=session['name']).first().id
+        project = Project(result.id, user_id)
+        db.session.add(project)
+        db.session.commit()
         result = {'result': {'id': result.id, 'seo_url': result.seo_url }}
         return jsonify(result)
 @app.route('/')
@@ -126,11 +139,10 @@ def index():
 def getbids(project_id):
     get_bids_data = {
         'project_ids': [
-            project_id,
-        ],
-        'limit': 10,
-        'offset': 0,
+            project_id
+        ]
     }
+    data = None
     try:
         # TODO: Make this an app level attribute instead
         s = Session(oauth_token=h["Freelancer-OAuth-V1"], url=base_url)
@@ -179,7 +191,14 @@ def create_milestone():
         print('Server response: {}'.format(e.error_code))
         return jsonify(response)
     # create the milestone
-    response = response['bids'][0]
+    if (len(response['bids']) > 0):
+        response = response['bids'][0]
+    else:
+        error = {
+            'status': 'error',
+            'message': 'No bid found.',
+        }
+        return jsonify(error)
     milestone_data = {
         "bidder_id": response["bidder_id"],
         "amount": response["amount"],
@@ -216,3 +235,19 @@ def pay(transaction_id):
         return jsonify(data)
     else:
         return jsonify(data)
+
+@app.route('/project/<int:project_id>', methods=['GET'])
+@authenticated
+def getproject(project_id):
+    s = Session(oauth_token=h["Freelancer-OAuth-V1"], url=base_url)
+    query = create_get_projects_object(
+        project_ids=[project_id]
+    )
+    data = None
+    try:
+        data = get_projects(s, query)
+    except ProjectsNotFoundException as e:
+        print('Error message: {}'.format(e.message))
+        print('Server response: {}'.format(e.error_code))
+        return jsonify(data)
+    return jsonify(data)
