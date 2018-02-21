@@ -1,4 +1,5 @@
 language: python
+
 matrix:
   include:
     - python: 3.6
@@ -12,3 +13,14 @@ install:
 
 script:
   - tox
+
+# To run TravisCI and build locally:
+# 1. Download Docker
+# 2. Run a docker container with a travisci/ci-python image.
+# 3. Switch to the travis user using: `su - travis`
+# 4. Install the wwtd(What Will Travis Do) gem.
+#    it will run your project's .travis.yml for you.
+#    ensure that tox, python3 and python2.7 are installed.
+# 5. Run `pyenv shell 3.6 2.7` to prepare the needed venvs.
+# 6. Run `wwwtd -u install -u language` to force travis to use your settings.
+# 7. If your builds succeed, then you are good to go. :)
