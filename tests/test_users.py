@@ -4,7 +4,7 @@ from freelancersdk.resources.users.helpers import (
 )
 from freelancersdk.resources.users import (
     add_user_jobs, set_user_jobs, delete_user_jobs,
-    get_users,
+    get_users, get_self_user_id
 )
 try:
     from unittest.mock import Mock
@@ -66,9 +66,25 @@ class FakeGetUsersGetResponse:
         }
 
 
+class FakeGetSelfUserIdGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'id': 100,
+            }
+        }
+
+
 class TestUsers(unittest.TestCase):
     def setUp(self):
-        self.session = Session(oauth_token='$sometoken', url='https://fake-fln.com')
+        self.session = Session(
+            oauth_token='$sometoken',
+            url='https://fake-fln.com'
+        )
 
     def tearDown(self):
         pass
@@ -92,6 +108,15 @@ class TestUsers(unittest.TestCase):
             json=user_jobs_data,
             verify=True)
         self.assertEquals(p, 'success')
+
+    def test_get_self_user_id(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetSelfUserIdGetResponse()
+
+        result = get_self_user_id(self.session)
+        self.assertTrue(self.session.session.get.called)
+
+        self.assertEqual(100, result)
 
     def test_set_user_jobs(self):
         user_jobs_data = {
