@@ -1,0 +1,14 @@
+language: python
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=lint,build-py36,py36
+
+    - python: 2.7
+      env: TOXENV=lint,build-py27,py27
+
+install:
+  - pip install tox
+
+script:
+  - tox
