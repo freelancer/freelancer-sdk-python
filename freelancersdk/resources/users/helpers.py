@@ -18,7 +18,7 @@ def make_post_request(session, endpoint, json_data):
                                 verify=True)
 
 
-def make_get_request(session, endpoint, params_data):
+def make_get_request(session, endpoint, params_data=None):
     url = urljoin(session.url, '{}/{}/'.format(users_endpoint, endpoint))
     return session.session.get(url, params=params_data, verify=True)
 
