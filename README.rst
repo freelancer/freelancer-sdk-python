@@ -3,6 +3,8 @@ Python library for Freelancer.com API
 
 .. image:: https://badge.fury.io/py/freelancersdk.svg
     :target: https://badge.fury.io/py/freelancersdk
+.. image:: https://travis-ci.org/freelancer/freelancer-sdk-python.svg?branch=master
+    :target: https://travis-ci.org/freelancer/freelancer-sdk-python
 
 
 This is a Python library for the `Freelancer.com
