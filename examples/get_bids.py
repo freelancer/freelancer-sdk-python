@@ -31,4 +31,4 @@ def sample_get_bids():
 
 b = sample_get_bids()
 if b:
-    print('Found bids: {}'.format(len(b('bids'))))
+    print('Found bids: {}'.format(len(b['bids'])))
