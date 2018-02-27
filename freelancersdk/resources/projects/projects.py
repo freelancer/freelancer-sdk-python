@@ -14,6 +14,7 @@ from freelancersdk.resources.projects.exceptions import (
     MilestoneNotRequestedReleaseException, MilestoneNotCancelledException,
     MilestoneRequestNotCreatedException, MilestoneRequestNotAcceptedException,
     MilestoneRequestNotRejectedException, MilestoneRequestNotDeletedException,
+    MilestonesNotFoundException,
     ReviewNotPostedException,
     JobsNotFoundException
 )
@@ -222,7 +223,32 @@ def get_bids(session, project_ids=[], bid_ids=[], limit=10, offset=0):
         return json_data['result']
     else:
         raise BidsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'], error_code=json_data['error_code']
+        )
+
+
+def get_milestones(session, project_ids=[], milestone_ids=[], limit=10, offset=0):
+    """
+    Get the list of milestones
+    """
+    get_milestones_data = {}
+    if milestone_ids:
+        get_milestones_data['milestones[]'] = milestone_ids
+    if project_ids:
+        get_milestones_data['projects[]'] = project_ids
+    get_milestones_data['limit'] = limit
+    get_milestones_data['offset'] = offset
+
+    # GET /api/projects/0.1/milestones/
+
+    response = make_get_request(session, 'milestones', params_data=get_milestones_data)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise MilestonesNotFoundException(
+            message=json_data['message'], error_code=json_data['error_code']
+        )
 
 
 def award_project_bid(session, bid_id):
