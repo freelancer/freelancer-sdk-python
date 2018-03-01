@@ -251,6 +251,22 @@ def get_milestones(session, project_ids=[], milestone_ids=[], limit=10, offset=0
         )
 
 
+def get_milestone_by_id(session, milestone_id):
+    """
+    Get a specific milestone
+    """
+    # GET /api/projects/0.1/milestones/{milestone_id}/
+    endpoint = 'milestones/{}'.format(milestone_id)
+    response = make_get_request(session, endpoint)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise MilestonesNotFoundException(
+            message=json_data['message'], error_code=json_data['error_code']
+        )
+
+
 def award_project_bid(session, bid_id):
     """
     Award a bid on a project

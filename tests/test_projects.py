@@ -9,7 +9,7 @@ from freelancersdk.resources.projects import (
     request_release_milestone_payment, cancel_milestone_payment,
     create_milestone_request, accept_milestone_request,
     reject_milestone_request, delete_milestone_request,
-    get_jobs, get_milestones
+    get_jobs, get_milestones, get_milestone_by_id
 )
 from freelancersdk.resources.projects.helpers import (
     create_budget_object, create_currency_object, create_job_object,
@@ -165,6 +165,27 @@ class FakeGetMilestonesGetResponse:
                         'bidder_id': 200,
                         'project_id': 202,
                         'transaction_id': 201
+                    }
+                },
+                'users': None,
+            },
+        }
+
+
+class FakeGetMilestoneByIDGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'milestones': {
+                    '101': {
+                        'status': 'cleared',
+                        'bidder_id': 100,
+                        'project_id': 102,
+                        'transaction_id': 101
                     }
                 },
                 'users': None,
@@ -557,6 +578,18 @@ class TestProjects(unittest.TestCase):
             verify=True
         )
         self.assertEquals(len(response['milestones']), 2)
+
+    def test_get_milestone(self):
+        milestone_id = 101
+
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetMilestoneByIDGetResponse()
+        get_milestone_by_id(self.session, milestone_id)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/projects/0.1/milestones/{}/'.format(milestone_id),
+            params=None,
+            verify=True
+        )
 
     def test_award_project_bid(self):
         bid_data = {
