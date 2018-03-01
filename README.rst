@@ -98,6 +98,8 @@ All the examples below recognizes two environment variables:
    request <examples/cancel_milestone_payment.py>`__
 -  `Request a Milestone payment
    release <examples/request_release_milestone_payment.py>`__
+-  `Retrieve project milestones <examples/get_milestones.py>`__
+-  `Retrieve a milestone by ID <examples/get_specific_milestone.py>`__
 
 **Messaging**
 

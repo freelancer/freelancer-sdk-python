@@ -9,7 +9,7 @@ from freelancersdk.resources.projects import (
     request_release_milestone_payment, cancel_milestone_payment,
     create_milestone_request, accept_milestone_request,
     reject_milestone_request, delete_milestone_request,
-    get_jobs, get_milestones
+    get_jobs, get_milestones, get_milestone_by_id
 )
 from freelancersdk.resources.projects.helpers import (
     create_budget_object, create_currency_object, create_job_object,
@@ -165,6 +165,27 @@ class FakeGetMilestonesGetResponse:
                         'bidder_id': 200,
                         'project_id': 202,
                         'transaction_id': 201
+                    }
+                },
+                'users': None,
+            },
+        }
+
+
+class FakeGetMilestoneByIDGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'milestones': {
+                    '101': {
+                        'status': 'cleared',
+                        'bidder_id': 100,
+                        'project_id': 102,
+                        'transaction_id': 101
                     }
                 },
                 'users': None,
@@ -537,6 +558,10 @@ class TestProjects(unittest.TestCase):
 
     def test_get_milestones(self):
         # Dictionary being passed to the python get_milestone function
+        user_details = create_get_projects_user_details_object(
+            country=True,
+            profile_description=True
+        )
         get_milestones_data = {
             'milestone_ids': [
                 101,
@@ -544,19 +569,40 @@ class TestProjects(unittest.TestCase):
             ],
             'limit': 20,
             'offset': 10,
+            'user_details': user_details
         }
 
         self.session.session.get = Mock()
         self.session.session.get.return_value = FakeGetMilestonesGetResponse()
         response = get_milestones(self.session, **get_milestones_data)
+
+        # Transforms the dictionary into the actual request sent by the function
         get_milestones_data.update({'milestones[]': get_milestones_data['milestone_ids']})
+        get_milestones_data.update(user_details)
         del(get_milestones_data['milestone_ids'])
+        del(get_milestones_data['user_details'])
+
         self.session.session.get.assert_called_once_with(
             'https://fake-fln.com/api/projects/0.1/milestones/',
             params=get_milestones_data,
             verify=True
         )
         self.assertEquals(len(response['milestones']), 2)
+
+    def test_get_milestone(self):
+        milestone_id = 101
+        user_details = create_get_projects_user_details_object(
+            country=True,
+            profile_description=True
+        )
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetMilestoneByIDGetResponse()
+        get_milestone_by_id(self.session, milestone_id, user_details)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/projects/0.1/milestones/{}/'.format(milestone_id),
+            params=user_details,
+            verify=True
+        )
 
     def test_award_project_bid(self):
         bid_data = {
