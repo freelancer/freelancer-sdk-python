@@ -295,8 +295,10 @@ def award_project_bid(session, bid_id):
         return json_data['status']
     else:
         json_data = response.json()
-        raise BidNotAwardedException(message=json_data['message'],
-                                    error_code=json_data['error_code'])
+        raise BidNotAwardedException(
+            message=json_data['message'],
+            error_code=json_data['error_code']
+        )
 
 
 def revoke_project_bid(session, bid_id):
