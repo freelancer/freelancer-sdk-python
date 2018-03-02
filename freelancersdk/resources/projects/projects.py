@@ -14,8 +14,13 @@ from freelancersdk.resources.projects.exceptions import (
     MilestoneNotRequestedReleaseException, MilestoneNotCancelledException,
     MilestoneRequestNotCreatedException, MilestoneRequestNotAcceptedException,
     MilestoneRequestNotRejectedException, MilestoneRequestNotDeletedException,
+    MilestonesNotFoundException,
     ReviewNotPostedException,
     JobsNotFoundException
+)
+
+from freelancersdk.resources.projects.helpers import (
+    create_get_projects_user_details_object
 )
 from freelancersdk.resources.projects import (
     make_get_request, make_post_request, make_put_request,
@@ -222,7 +227,53 @@ def get_bids(session, project_ids=[], bid_ids=[], limit=10, offset=0):
         return json_data['result']
     else:
         raise BidsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'], error_code=json_data['error_code']
+        )
+
+
+def get_milestones(session, project_ids=[], milestone_ids=[], user_details=None, limit=10, offset=0):
+    """
+    Get the list of milestones
+    """
+    get_milestones_data = {}
+    if milestone_ids:
+        get_milestones_data['milestones[]'] = milestone_ids
+    if project_ids:
+        get_milestones_data['projects[]'] = project_ids
+    get_milestones_data['limit'] = limit
+    get_milestones_data['offset'] = offset
+
+    # Add projections if they exist
+    if user_details:
+        get_milestones_data.update(user_details)
+
+    # GET /api/projects/0.1/milestones/
+
+    response = make_get_request(session, 'milestones', params_data=get_milestones_data)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise MilestonesNotFoundException(
+            message=json_data['message'], error_code=json_data['error_code']
+        )
+
+
+def get_milestone_by_id(session, milestone_id, user_details=None):
+    """
+    Get a specific milestone
+    """
+    # GET /api/projects/0.1/milestones/{milestone_id}/
+    endpoint = 'milestones/{}'.format(milestone_id)
+
+    response = make_get_request(session, endpoint, params_data=user_details)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise MilestonesNotFoundException(
+            message=json_data['message'], error_code=json_data['error_code']
+        )
 
 
 def award_project_bid(session, bid_id):
@@ -244,8 +295,10 @@ def award_project_bid(session, bid_id):
         return json_data['status']
     else:
         json_data = response.json()
-        raise BidNotAwardedException(message=json_data['message'],
-                                    error_code=json_data['error_code'])
+        raise BidNotAwardedException(
+            message=json_data['message'],
+            error_code=json_data['error_code']
+        )
 
 
 def revoke_project_bid(session, bid_id):

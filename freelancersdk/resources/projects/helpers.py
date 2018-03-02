@@ -10,7 +10,7 @@ except ImportError:
 
 # Make API calls
 # /api/projects/0.1/<specific_endpoint>
-def make_get_request(session, endpoint, params_data):
+def make_get_request(session, endpoint, params_data=None):
     url = urljoin(session.url, '{}/{}/'.format(projects_endpoint, endpoint))
     return session.session.get(url, params=params_data, verify=True)
 

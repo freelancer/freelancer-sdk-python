@@ -70,6 +70,15 @@ class BidNotRetractedException(Exception):
         self.error_code = error_code
 
 
+class MilestonesNotFoundException(Exception):
+    """
+    Milestone could not be found
+    """
+    def __init__(self, message, error_code):
+        super(MilestonesNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
 class MilestoneNotCreatedException(Exception):
     """
     Milestone could not be created
