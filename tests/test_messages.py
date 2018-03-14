@@ -1,7 +1,7 @@
 from freelancersdk.session import Session
 from freelancersdk.resources.messages.messages import (
     create_project_thread, post_message, post_attachment, get_messages,
-    get_threads
+    get_threads, search_messages
 )
 from freelancersdk.resources.messages.helpers import (
     create_attachment, create_get_threads_object, create_get_threads_details_object,
@@ -108,6 +108,27 @@ class FakeGetMessagesGetResponse:
         }
 
 
+class FakeSearchMessagesGetResponse:
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'unfiltered_count': 1,
+                'messages': [
+                    {
+                        'message_source': 'default_msg',
+                        'attachments': [],
+                        'thread_id': 1,
+                        'message': 'Hello world!',
+                        'id': 1,
+                    }
+                ]
+            }
+        }
+
+
 class FakeGetThreadsGetResponse:
     status_code = 200
 
@@ -203,6 +224,25 @@ class TestMessages(unittest.TestCase):
             verify=True
         )
         self.assertEquals(len(response['messages']),2)
+
+    def test_search_messages(self):
+        query = {
+            'thread_id': 1,
+            'query': 'Hello world!',
+            'offset': 0,
+            'limit': 20
+        }
+
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeSearchMessagesGetResponse()
+
+        response = search_messages(self.session, **query)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/messages/0.1/messages/search/',
+            params=query,
+            verify=True
+        )
+        self.assertEquals(len(response['messages']), 1)
 
     def test_get_threads(self):
         query = create_get_threads_object(
