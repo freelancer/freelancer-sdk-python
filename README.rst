@@ -111,7 +111,7 @@ All the examples below recognizes two environment variables:
    thread <examples/create_message_with_attachment.py>`__
 -  `Retrieve messages <examples/get_messages.py>`__
 -  `Retrieve threads <examples/get_threads.py>`__
--  `Search for messages <examples/get_messages.py>`__
+-  `Search for messages <examples/search_messages.py>`__
 
 **Contests**
 
