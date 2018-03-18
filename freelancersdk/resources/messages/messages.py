@@ -5,9 +5,12 @@ This module contains functions for message operations
 from freelancersdk.resources.messages.types import (
     Thread, Message
 )
-from freelancersdk.resources.messages.helpers import make_post_request
+from freelancersdk.resources.messages.helpers import (
+    make_post_request, make_get_request
+)
 from freelancersdk.resources.messages.exceptions import (
-    ThreadNotCreatedException, MessageNotCreatedException
+    ThreadNotCreatedException, MessageNotCreatedException,
+    MessagesNotFoundException, ThreadsNotFoundException
 )
 
 
@@ -89,3 +92,69 @@ def post_attachment(session, thread_id, attachments):
     else:
         raise MessageNotCreatedException(message=json_data['message'],
                                          error_code=json_data['error_code'])
+
+
+def get_messages(session, query, limit=10, offset=0):
+    """
+    Get one or more messages
+    """
+    query['limit'] = limit
+    query['offset'] = offset
+    
+    # GET /api/messages/0.1/messages
+    response = make_get_request(session, 'messages', params_data=query)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise MessagesNotFoundException(
+            message=json_data['message'],
+            error_code=json_data['error_code']
+        )
+
+
+def search_messages(session, thread_id, query, limit=20,
+                    offset=0, message_context_details=None,
+                    window_above=None, window_below=None):
+    """
+    Search for messages
+    """
+    query = {
+        'thread_id': thread_id,
+        'query': query,
+        'limit': limit,
+        'offset': offset
+    }
+    if message_context_details:
+        query['message_context_details'] = message_context_details
+    if window_above:
+        query['window_above'] = window_above
+    if window_below:
+        query['window_below'] = window_below
+
+    # GET /api/messages/0.1/messages/search
+    response = make_get_request(session, 'messages/search', params_data=query)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise MessagesNotFoundException(
+            message=json_data['message'],
+            error_code=json_data['error_code']
+        )
+
+
+def get_threads(session, query):
+    """
+    Get one or more threads
+    """
+    # GET /api/messages/0.1/threads
+    response = make_get_request(session, 'threads', params_data=query)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise ThreadsNotFoundException(
+            message=json_data['message'],
+            error_code=json_data['error_code']
+        )
