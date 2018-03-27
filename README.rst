@@ -125,6 +125,10 @@ All the examples below recognizes two environment variables:
 -  `Retrieve User Details <examples/get_users.py>`__
 -  `Search for freelancers <examples/search_freelancers.py>`__
 -  `Retrieve the current user's details <examples/get_self.py>`__
+<<<<<<< 1a5f1e96b94ea5f4cf9454ad04e635d1798b3615
+=======
+
+>>>>>>> add user getters
 License
 ~~~~~~~
 
