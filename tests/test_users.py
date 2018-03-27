@@ -1,10 +1,10 @@
 from freelancersdk.session import Session
 from freelancersdk.resources.users.helpers import (
-    create_get_users_object,
+    create_get_users_object, create_get_users_details_object
 )
 from freelancersdk.resources.users import (
     add_user_jobs, set_user_jobs, delete_user_jobs,
-    get_users, get_self_user_id
+    get_users, get_self_user_id, get_self, search_freelancers
 )
 try:
     from unittest.mock import Mock
@@ -66,7 +66,39 @@ class FakeGetUsersGetResponse:
         }
 
 
+class FakeSearchFreelancersGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'users': {
+                    '100': {
+                        'status': None,
+                        'id': 100,
+                        'username': 'freelancer123'
+                    }
+                }
+            }
+        }
+
+
 class FakeGetSelfUserIdGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'id': 100,
+            }
+        }
+
+
+class FakeGetSelfGetResponse:
 
     status_code = 200
 
@@ -108,6 +140,23 @@ class TestUsers(unittest.TestCase):
             json=user_jobs_data,
             verify=True)
         self.assertEquals(p, 'success')
+    
+    def test_get_self(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetSelfGetResponse()
+
+        user_details = create_get_users_details_object(
+            country=True,
+            status=True
+        )
+
+        result = get_self(self.session, user_details)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/self/',
+            params=user_details,
+            verify=True
+        )
+
 
     def test_get_self_user_id(self):
         self.session.session.get = Mock()
@@ -177,3 +226,30 @@ class TestUsers(unittest.TestCase):
 
         query_params = self.session.session.get.call_args[1]
         self.assertIn(('users[]', [100, 200]), query_params['params'].items())
+
+    def test_search_freelancers(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeSearchFreelancersGetResponse()
+
+        search_freelancers_data = {
+            'username': 'freelancer123',
+            'limit': 10,
+            'offset': 0
+        }
+        user_details = create_get_users_details_object(
+            country=True,
+            status=True
+        )
+        search_freelancers_data.update(user_details)
+
+        result = search_freelancers(
+            self.session,
+            username='freelancer123',
+            user_details=user_details
+        )
+
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/users/directory/',
+            params=search_freelancers_data,
+            verify=True
+        )
