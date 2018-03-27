@@ -123,7 +123,8 @@ All the examples below recognizes two environment variables:
 -  `Delete a job from a user's jobs <examples/delete_user_jobs.py>`__
 -  `Set a user's list of jobs <examples/set_user_jobs.py>`__
 -  `Retrieve User Details <examples/get_users.py>`__
-
+-  `Search for freelancers <examples/search_freelancers.py>`__
+-  `Retrieve the current user's details <examples/get_self.py>`__
 License
 ~~~~~~~
 

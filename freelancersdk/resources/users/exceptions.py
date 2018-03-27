@@ -41,3 +41,12 @@ class UsersNotFoundException(Exception):
     def __init__(self, message, error_code):
         super(UsersNotFoundException, self).__init__(message)
         self.error_code = error_code
+
+
+class SelfNotRetrievedException(Exception):
+    """
+    Self User could not be retrieved
+    """
+    def __init__(self, message, error_code):
+        super(SelfNotRetrievedException, self).__init__(message)
+        self.error_code = error_code
