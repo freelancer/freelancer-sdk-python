@@ -234,7 +234,8 @@ class TestUsers(unittest.TestCase):
         search_freelancers_data = {
             'username': 'freelancer123',
             'limit': 10,
-            'offset': 0
+            'offset': 0,
+            'compact': True,
         }
         user_details = create_get_users_details_object(
             country=True,
