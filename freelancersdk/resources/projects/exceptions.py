@@ -16,6 +16,33 @@ class BidNotPlacedException(Exception):
         self.error_code = error_code
 
 
+class TrackNotFoundException(Exception):
+    """
+    Track could not be found
+    """
+    def __init__(self, message, error_code):
+        super(TrackNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
+class TrackNotUpdatedException(Exception):
+    """
+    Track could not be updated
+    """
+    def __init__(self, message, error_code):
+        super(TrackNotUpdatedException, self).__init__(message)
+        self.error_code = error_code
+
+
+class TrackNotCreatedException(Exception):
+    """
+    Track could not be created
+    """
+    def __init__(self, message, error_code):
+        super(TrackNotCreatedException, self).__init__(message)
+        self.error_code = error_code
+
+
 class BidsNotFoundException(Exception):
     """
     Bids could not be found

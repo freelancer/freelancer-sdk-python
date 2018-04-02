@@ -9,7 +9,8 @@ from freelancersdk.resources.projects import (
     request_release_milestone_payment, cancel_milestone_payment,
     create_milestone_request, accept_milestone_request,
     reject_milestone_request, delete_milestone_request,
-    get_jobs, get_milestones, get_milestone_by_id
+    get_jobs, get_milestones, get_milestone_by_id, update_track,
+    post_track, get_track_by_id
 )
 from freelancersdk.resources.projects.helpers import (
     create_budget_object, create_currency_object, create_job_object,
@@ -322,6 +323,66 @@ class FakeCreateMilestoneRequestPostResponse:
                 'amount': 10,
                 'description': 'This is a milestone request'
             }
+        }
+
+
+class FakeGetTrackGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            "result": {
+                "user_id": 2,
+                "time_started": 1522680177,
+                "track_points": [
+                    {
+                        "latitude": 14.7,
+                        "time_created": 1522680177,
+                        "longitude": 15.7
+                    }
+                ],
+                "project_id": 3,
+                "id": 1
+            },
+            "request_id": "1f54ba86369411e8bbcf22000afa00fd"
+        }
+
+
+class FakeUpdateTrackPutResponse:
+    status_code = 200
+
+    def json(self):
+        return {
+            "status": "success",
+            "result": {
+                "latitude": 14.8,
+                "time_created": 1522689823,
+                "longitude": 15.8
+            },
+            "request_id": "97e0dbb4369a11e8bbcf22000afa00fd"
+        }
+
+class FakePostTrackPostResponse:
+    status_code = 200
+
+    def json(self):
+        return {
+            "status": "success",
+            "result": {
+                "user_id": 1,
+                "time_started": 1522680177,
+                "track_points": [
+                    {
+                        "latitude": 14.7,
+                        "time_created": 1522680177,
+                        "longitude": 15.7
+                    }
+                ],
+                "project_id": 2,
+                "id": 3
+            },
+            "request_id": "1f54ba86369411e8bbcf22000afa00fd"
         }
 
 
@@ -839,5 +900,72 @@ class TestProjects(unittest.TestCase):
         self.session.session.get.assert_called_once_with(
             'https://fake-fln.com/api/projects/0.1/jobs/',
             params=get_jobs_data,
-            verify=True)
+            verify=True
+        )
         self.assertEquals(len(j), len(get_jobs_data['jobs[]']))
+
+    def test_get_track_by_id(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetTrackGetResponse()
+        track_id = 1
+        params = {}
+        track = get_track_by_id(self.session, track_id)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/projects/0.1/tracks/{}/'.format(track_id),
+            params=params,
+            verify=True
+        )
+        self.assertEquals(track_id, track['id'])
+
+    def test_update_track(self):
+        track_id = 1
+        latitude = 14.8
+        longitude = 15.8
+        stop_tracking = False
+
+        json_data = {
+            'track_point': {
+                'latitude': latitude,
+                'longitude': longitude
+            },
+            'stop_tracking': stop_tracking
+        }
+
+        self.session.session.put = Mock()
+        self.session.session.put.return_value = FakeUpdateTrackPutResponse()
+        result = update_track(self.session, track_id, latitude, longitude, stop_tracking)
+        self.session.session.put.assert_called_once_with(
+            'https://fake-fln.com/api/projects/0.1/tracks/{}/'.format(track_id),
+            json=json_data,
+            data=None,
+            headers=None,
+            params=None,
+            verify=True
+        )
+        self.assertEqual(result['latitude'], latitude)
+        self.assertEqual(result['longitude'], longitude)
+    
+    def test_post_track(self):
+        user_id = 1
+        project_id = 2
+        latitude = 14.7
+        longitude = 15.7
+
+        json_data = {
+            'user_id': user_id,
+            'project_id': project_id,
+            'track_point': {
+                'latitude': latitude,
+                'longitude': longitude
+            }
+        }
+
+        self.session.session.post = Mock()
+        self.session.session.post.return_value = FakePostTrackPostResponse()
+        post_track(self.session, user_id, project_id, latitude, longitude)
+        self.session.session.post.assert_called_once_with(
+            'https://fake-fln.com/api/projects/0.1/tracks/',
+            json=json_data,
+            verify=True
+        )
+

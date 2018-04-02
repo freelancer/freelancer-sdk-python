@@ -14,9 +14,8 @@ from freelancersdk.resources.projects.exceptions import (
     MilestoneNotRequestedReleaseException, MilestoneNotCancelledException,
     MilestoneRequestNotCreatedException, MilestoneRequestNotAcceptedException,
     MilestoneRequestNotRejectedException, MilestoneRequestNotDeletedException,
-    MilestonesNotFoundException,
-    ReviewNotPostedException,
-    JobsNotFoundException
+    MilestonesNotFoundException, TrackNotCreatedException, TrackNotFoundException,
+    TrackNotUpdatedException, ReviewNotPostedException, JobsNotFoundException
 )
 
 from freelancersdk.resources.projects.helpers import (
@@ -416,6 +415,78 @@ def create_milestone_payment(session, project_id, bidder_id, amount,
         raise MilestoneNotCreatedException(message=json_data['message'],
                                            error_code=json_data['error_code'])
 
+
+def post_track(session, user_id, project_id, latitude, longitude):
+    """
+    Start tracking a project by creating a track
+    """
+    tracking_data = {
+        'user_id': user_id,
+        'project_id': project_id,
+        'track_point': {
+            'latitude': latitude,
+            'longitude': longitude
+        }
+    }
+
+    # POST /api/projects/0.1/tracks/
+    response = make_post_request(session, 'tracks',
+                                json_data=tracking_data)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise TrackNotCreatedException(message=json_data['message'],
+                                       error_code=json_data['error_code'])
+
+
+def update_track(session, track_id, latitude, longitude, stop_tracking=False):
+    """
+    Updates the current location by creating a new track point and appending
+    it to the given track
+    """
+
+    tracking_data = {
+        'track_point': {
+            'latitude': latitude,
+            'longitude': longitude, 
+        },
+        'stop_tracking': stop_tracking
+    }
+    
+    # PUT /api/projects/0.1/tracks/{track_id}/
+
+    response = make_put_request(session, 'tracks/{}'.format(track_id),
+                                json_data=tracking_data)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise TrackNotUpdatedException(message=json_data['message'],
+                                      error_code=json_data['error_code'])
+
+
+def get_track_by_id(session, track_id, track_point_limit=None, track_point_offset=None):
+    """
+    Gets a specific track
+    """
+
+    tracking_data = {}
+    if track_point_limit:
+        tracking_data['track_point_limit'] = track_point_limit
+    if track_point_offset:
+        tracking_data['track_point_offset'] = track_point_offset
+
+    # GET /api/projects/0.1/tracks/{track_id}/
+
+    response = make_get_request(session, 'tracks/{}'.format(track_id),
+                                                    params_data=tracking_data)
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise TrackNotFoundException(message=json_data['message'],
+                                      error_code=json_data['error_code'])
 
 def release_milestone_payment(session, milestone_id, amount):
     """
