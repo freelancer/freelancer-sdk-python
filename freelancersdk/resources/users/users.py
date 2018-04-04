@@ -170,3 +170,47 @@ def search_freelancers(
         raise UsersNotFoundException(
             message=json_data['message'], error_code=json_data['error_code']
         )
+
+
+def get_reputations(session, user_ids, job_ids=[], role=None,
+                    reputation_details=None):
+    query = {}
+    query['users[]'] = user_ids
+    query['jobs[]'] = job_ids
+    query['role'] = role
+    if reputation_details:
+        query.update(reputation_details)
+    
+    response = make_get_request(
+        session, 'reputations',
+        params_data=query
+    )
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise ReputationsNotFoundException(
+            message=json_data['message'], error_code=json_data['error_code']
+        )
+
+
+def get_portfolios(session, user_ids, limit=10, offset=0):
+    query = {'users[]': user_ids}
+
+    # Portfolio limits are counted per user. e.a. having 
+    # a limit of 10 gives a max of 20 entries for 2 users
+
+    query['limit'] = limit
+    query['offset'] = offset
+    response = make_get_request(
+        session, 'portfolios',
+        params_data=query
+    )
+    json_data = response.json()
+    if response.status_code == 200:
+        return json_data['result']
+    else:
+        raise PortfoliosNotFoundException(
+            message=json_data['message'], error_code=json_data['error_code']
+        )
+    

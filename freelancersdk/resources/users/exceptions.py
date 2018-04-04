@@ -59,3 +59,21 @@ class SelfNotRetrievedException(Exception):
     def __init__(self, message, error_code):
         super(SelfNotRetrievedException, self).__init__(message)
         self.error_code = error_code
+
+
+class ReputationsNotFoundException(Exception):
+    """
+    User reputations could not be found
+    """
+    def __init__(self, message, error_code):
+        super(ReputationsNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
+class PortfoliosNotFoundException(Exception):
+    """
+    User portfolios could not be found
+    """
+    def __init__(self, message, error_code):
+        super(ReputationsNotFoundException, self).__init__(message)
+        self.error_code = error_code

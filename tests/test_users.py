@@ -5,7 +5,7 @@ from freelancersdk.resources.users.helpers import (
 from freelancersdk.resources.users import (
     add_user_jobs, set_user_jobs, delete_user_jobs,
     get_users, get_self_user_id, get_self, search_freelancers,
-    get_user_by_id
+    get_user_by_id, get_reputations, get_portfolios
 )
 try:
     from unittest.mock import Mock
@@ -122,6 +122,75 @@ class FakeGetSelfGetResponse:
             'status': 'success',
             'result': {
                 'id': 100,
+            }
+        }
+
+
+class FakeGetReputationsGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                '1': {
+                    'user_id': 1,
+                    'last3months': {
+                        'completion_rate': 0.75,
+                        'all': 4
+                    }
+                },
+                '2': {
+                    'user_id': 2,
+                    'last3months': {
+                        'completion_rate': 0.99,
+                        'all': 7
+                    }
+                },
+                '3': {
+                    'user_id': 3,
+                    'last3months': {
+                        'completion_rate': 0.88,
+                        'all': 10
+                    }
+                }
+            }
+        }
+
+
+class FakeGetPortfoliosGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'portfolios': {
+                    '1': [
+                        {
+                            'files': [{
+                                'description': 'hello',
+                                'filename': 'Hello.flv',
+                                'id': 2000
+                            }],
+                            'articles': [],
+                            'user_id': 1,
+                            'description': 'hello!'
+                        },
+                        {
+                            'files': [{
+                                'description': 'hi',
+                                'filename': 'Hi.jpg',
+                                'id': 2001
+                            }],
+                            'articles': [],
+                            'user_id': 1,
+                            'description': 'hi!'
+                        }
+                    ]
+                }
             }
         }
 
@@ -286,3 +355,57 @@ class TestUsers(unittest.TestCase):
             params=search_freelancers_data,
             verify=True
         )
+    
+    def test_get_reputations(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetReputationsGetResponse()
+
+        user_ids = [1,2,3]
+        role = 'freelancer'
+        reputation_details = {
+            'job_history': True,
+            'project_stats': True,
+            'rehire_rates': True
+        }
+
+        get_reputations_data = {
+            'users[]': user_ids,
+            'jobs[]': [],
+            'role': role,
+        }
+        get_reputations_data.update(reputation_details)
+        result = get_reputations(
+            self.session,
+            user_ids = user_ids,
+            role = role,
+            reputation_details = reputation_details
+        )
+
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/reputations/',
+            params=get_reputations_data,
+            verify=True
+        )
+        self.assertEqual(len(result), len(user_ids))
+
+    def test_get_portfolios(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetPortfoliosGetResponse()
+        user_ids = [1]
+        limit = 10
+
+        get_reputations_data = {
+            'users[]': user_ids,
+            'limit': limit,
+            'offset': 0
+        }
+        
+
+        result = get_portfolios(self.session, user_ids, limit)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/portfolios/',
+            params=get_reputations_data,
+            verify=True
+        )
+        self.assertEqual(len(result['portfolios']), 1)
+        self.assertEqual(len(result['portfolios']['1']), 2)
