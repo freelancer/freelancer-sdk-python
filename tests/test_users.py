@@ -4,7 +4,8 @@ from freelancersdk.resources.users.helpers import (
 )
 from freelancersdk.resources.users import (
     add_user_jobs, set_user_jobs, delete_user_jobs,
-    get_users, get_self_user_id, get_self, search_freelancers
+    get_users, get_self_user_id, get_self, search_freelancers,
+    get_user_by_id
 )
 try:
     from unittest.mock import Mock
@@ -81,6 +82,20 @@ class FakeSearchFreelancersGetResponse:
                         'username': 'freelancer123'
                     }
                 }
+            }
+        }
+
+
+class FakeGetUserByIdGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'id': 100,
+                'username': 'freelancer123'
             }
         }
 
@@ -166,6 +181,23 @@ class TestUsers(unittest.TestCase):
         self.assertTrue(self.session.session.get.called)
 
         self.assertEqual(100, result)
+    
+
+    def test_get_user_by_id(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetUserByIdGetResponse()
+        user_id = 100
+        user_details = create_get_users_details_object(
+            country=True,
+            status=True
+        )
+        result = get_user_by_id(self.session, user_id, user_details)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/users/{}/'.format(user_id),
+            params=user_details,
+            verify=True
+        )
+
 
     def test_set_user_jobs(self):
         user_jobs_data = {

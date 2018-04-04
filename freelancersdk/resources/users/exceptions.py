@@ -34,6 +34,15 @@ class UserJobsNotDeletedException(Exception):
         self.error_code = error_code
 
 
+class UserNotFoundException(Exception):
+    """
+    Specific user could not be found
+    """
+    def __init__(self, message, error_code):
+        super(UserNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
 class UsersNotFoundException(Exception):
     """
     Users could not be found
