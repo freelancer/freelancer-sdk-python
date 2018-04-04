@@ -4,7 +4,8 @@ from freelancersdk.resources.users.exceptions import (
     UserIdNotRetrievedException,
     UserJobsNotAddedException, UserJobsNotSetException,
     UserJobsNotDeletedException, UsersNotFoundException,
-    SelfNotRetrievedException, UserNotFoundException
+    SelfNotRetrievedException, UserNotFoundException,
+    ReputationsNotFoundException, PortfoliosNotFoundException
 )
 
 def get_self(session, user_details=None):
