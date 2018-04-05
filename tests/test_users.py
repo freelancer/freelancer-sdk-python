@@ -1,10 +1,11 @@
 from freelancersdk.session import Session
 from freelancersdk.resources.users.helpers import (
-    create_get_users_object,
+    create_get_users_object, create_get_users_details_object
 )
 from freelancersdk.resources.users import (
     add_user_jobs, set_user_jobs, delete_user_jobs,
-    get_users, get_self_user_id
+    get_users, get_self_user_id, get_self, search_freelancers,
+    get_user_by_id, get_reputations, get_portfolios
 )
 try:
     from unittest.mock import Mock
@@ -66,6 +67,39 @@ class FakeGetUsersGetResponse:
         }
 
 
+class FakeSearchFreelancersGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'users': {
+                    '100': {
+                        'status': None,
+                        'id': 100,
+                        'username': 'freelancer123'
+                    }
+                }
+            }
+        }
+
+
+class FakeGetUserByIdGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'id': 100,
+                'username': 'freelancer123'
+            }
+        }
+
+
 class FakeGetSelfUserIdGetResponse:
 
     status_code = 200
@@ -75,6 +109,88 @@ class FakeGetSelfUserIdGetResponse:
             'status': 'success',
             'result': {
                 'id': 100,
+            }
+        }
+
+
+class FakeGetSelfGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'id': 100,
+            }
+        }
+
+
+class FakeGetReputationsGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                '1': {
+                    'user_id': 1,
+                    'last3months': {
+                        'completion_rate': 0.75,
+                        'all': 4
+                    }
+                },
+                '2': {
+                    'user_id': 2,
+                    'last3months': {
+                        'completion_rate': 0.99,
+                        'all': 7
+                    }
+                },
+                '3': {
+                    'user_id': 3,
+                    'last3months': {
+                        'completion_rate': 0.88,
+                        'all': 10
+                    }
+                }
+            }
+        }
+
+
+class FakeGetPortfoliosGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'portfolios': {
+                    '1': [
+                        {
+                            'files': [{
+                                'description': 'hello',
+                                'filename': 'Hello.flv',
+                                'id': 2000
+                            }],
+                            'articles': [],
+                            'user_id': 1,
+                            'description': 'hello!'
+                        },
+                        {
+                            'files': [{
+                                'description': 'hi',
+                                'filename': 'Hi.jpg',
+                                'id': 2001
+                            }],
+                            'articles': [],
+                            'user_id': 1,
+                            'description': 'hi!'
+                        }
+                    ]
+                }
             }
         }
 
@@ -108,6 +224,23 @@ class TestUsers(unittest.TestCase):
             json=user_jobs_data,
             verify=True)
         self.assertEquals(p, 'success')
+    
+    def test_get_self(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetSelfGetResponse()
+
+        user_details = create_get_users_details_object(
+            country=True,
+            status=True
+        )
+
+        result = get_self(self.session, user_details)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/self/',
+            params=user_details,
+            verify=True
+        )
+
 
     def test_get_self_user_id(self):
         self.session.session.get = Mock()
@@ -117,6 +250,23 @@ class TestUsers(unittest.TestCase):
         self.assertTrue(self.session.session.get.called)
 
         self.assertEqual(100, result)
+    
+
+    def test_get_user_by_id(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetUserByIdGetResponse()
+        user_id = 100
+        user_details = create_get_users_details_object(
+            country=True,
+            status=True
+        )
+        result = get_user_by_id(self.session, user_id, user_details)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/users/{}/'.format(user_id),
+            params=user_details,
+            verify=True
+        )
+
 
     def test_set_user_jobs(self):
         user_jobs_data = {
@@ -177,3 +327,85 @@ class TestUsers(unittest.TestCase):
 
         query_params = self.session.session.get.call_args[1]
         self.assertIn(('users[]', [100, 200]), query_params['params'].items())
+
+    def test_search_freelancers(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeSearchFreelancersGetResponse()
+
+        search_freelancers_data = {
+            'username': 'freelancer123',
+            'limit': 10,
+            'offset': 0,
+            'compact': True,
+        }
+        user_details = create_get_users_details_object(
+            country=True,
+            status=True
+        )
+        search_freelancers_data.update(user_details)
+
+        result = search_freelancers(
+            self.session,
+            username='freelancer123',
+            user_details=user_details
+        )
+
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/users/directory/',
+            params=search_freelancers_data,
+            verify=True
+        )
+    
+    def test_get_reputations(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetReputationsGetResponse()
+
+        user_ids = [1,2,3]
+        role = 'freelancer'
+        reputation_details = {
+            'job_history': True,
+            'project_stats': True,
+            'rehire_rates': True
+        }
+
+        get_reputations_data = {
+            'users[]': user_ids,
+            'jobs[]': [],
+            'role': role,
+        }
+        get_reputations_data.update(reputation_details)
+        result = get_reputations(
+            self.session,
+            user_ids = user_ids,
+            role = role,
+            reputation_details = reputation_details
+        )
+
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/reputations/',
+            params=get_reputations_data,
+            verify=True
+        )
+        self.assertEqual(len(result), len(user_ids))
+
+    def test_get_portfolios(self):
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetPortfoliosGetResponse()
+        user_ids = [1]
+        limit = 10
+
+        get_reputations_data = {
+            'users[]': user_ids,
+            'limit': limit,
+            'offset': 0
+        }
+        
+
+        result = get_portfolios(self.session, user_ids, limit)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/users/0.1/portfolios/',
+            params=get_reputations_data,
+            verify=True
+        )
+        self.assertEqual(len(result['portfolios']), 1)
+        self.assertEqual(len(result['portfolios']['1']), 2)

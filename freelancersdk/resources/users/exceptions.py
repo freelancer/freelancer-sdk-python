@@ -34,10 +34,46 @@ class UserJobsNotDeletedException(Exception):
         self.error_code = error_code
 
 
+class UserNotFoundException(Exception):
+    """
+    Specific user could not be found
+    """
+    def __init__(self, message, error_code):
+        super(UserNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
 class UsersNotFoundException(Exception):
     """
     Users could not be found
     """
     def __init__(self, message, error_code):
         super(UsersNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
+class SelfNotRetrievedException(Exception):
+    """
+    Self User could not be retrieved
+    """
+    def __init__(self, message, error_code):
+        super(SelfNotRetrievedException, self).__init__(message)
+        self.error_code = error_code
+
+
+class ReputationsNotFoundException(Exception):
+    """
+    User reputations could not be found
+    """
+    def __init__(self, message, error_code):
+        super(ReputationsNotFoundException, self).__init__(message)
+        self.error_code = error_code
+
+
+class PortfoliosNotFoundException(Exception):
+    """
+    User portfolios could not be found
+    """
+    def __init__(self, message, error_code):
+        super(ReputationsNotFoundException, self).__init__(message)
         self.error_code = error_code
