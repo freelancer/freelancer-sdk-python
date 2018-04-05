@@ -70,6 +70,9 @@ All the examples below recognizes two environment variables:
 -  `Search for Projects <examples/search_projects.py>`__
 -  `Retrieve Project details <examples/get_projects.py>`__
 -  `Get a list of jobs (skills) <examples/get_jobs.py>`__
+-  `Track a freelancer's location for a project <examples/create_track.py>`__
+-  `Update a track's location <examples/update_track.py>`__
+-  `Retrieve a track by ID <examples/get_specific_track.py>`__
 
 **Bids**
 
