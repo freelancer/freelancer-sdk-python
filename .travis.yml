@@ -20,7 +20,6 @@ jobs:
       script: skip
       deploy:
         provider: pypi
-        python: 2.7
         user: freelancer
         password: ${PYPI_PASSWORD}
         on:
