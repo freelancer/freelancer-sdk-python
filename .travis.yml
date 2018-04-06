@@ -1,12 +1,20 @@
 language: python
 
+python: 
+  - 3.6
+  - 2.7
+
+env:
+  - TOXENV=lint,build-py36,py36
+  - TOXENV=lint,build-py27,py27
+
 matrix:
-  include:
+  exclude:
     - python: 3.6
-      env: TOXENV=lint,build-py36,py36
+      env: TOXENV=lint,build-py27,py27
 
     - python: 2.7
-      env: TOXENV=lint,build-py27,py27
+      env: TOXENV=lint,build-py36,py36
 
 install:
   - pip install tox
@@ -14,15 +22,11 @@ install:
 script:
   - tox
 
-stages:
-  - test
-  - deploy
 
 jobs:
   include:
-    - stage: test
     - stage: deploy
-      script: skip
+      script: echo "Deploying to PyPI..."
       deploy:
         provider: pypi
         user: freelancer
