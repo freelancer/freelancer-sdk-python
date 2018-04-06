@@ -11,11 +11,16 @@ matrix:
 install:
   - pip install tox
 
-script: 
+script:
   - tox
+
+stages:
+  - test
+  - deploy
 
 jobs:
   include:
+    - stage: test
     - stage: deploy
       script: skip
       deploy:
