@@ -19,6 +19,7 @@ deploy:
   password: ${PYPI_PASSWORD}
   on:
     tags: true
+  skip_existing: true
 
 # To run TravisCI and build locally:
 # 1. Download Docker
