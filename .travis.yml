@@ -11,15 +11,20 @@ matrix:
 install:
   - pip install tox
 
-script:
+script: 
   - tox
-deploy:
-  provider: pypi
-  user: freelancer
-  password: ${PYPI_PASSWORD}
-  on:
-    tags: true
-  skip_existing: true
+
+jobs:
+  include:
+    - stage: deploy
+      script: skip
+      deploy:
+        provider: pypi
+        python: 2.7
+        user: freelancer
+        password: ${PYPI_PASSWORD}
+        on:
+          tags: true
 
 # To run TravisCI and build locally:
 # 1. Download Docker
