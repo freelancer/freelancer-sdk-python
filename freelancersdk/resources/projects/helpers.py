@@ -226,7 +226,9 @@ def create_get_projects_project_details_object(full_description=None, jobs=None,
                                                invited_freelancers=None,
                                                recommended_freelancers=None,
                                                support_sessions=None,
-                                               location=None):
+                                               location=None, nda_signature=None,
+                                               project_collaboration=None,
+                                               tracks=None):
     d = {}
     if full_description:
         d.update(full_description=full_description)
@@ -252,6 +254,12 @@ def create_get_projects_project_details_object(full_description=None, jobs=None,
         d.update(support_session_details=support_sessions)
     if location:
         d.update(location_details=location)
+    if nda_signature:
+        d.update(nda_signature_details=nda_signature)
+    if project_collaboration:
+        d.update(project_collaboration_details=project_collaboration)
+    if tracks:
+        d.update(track_details=tracks)
 
     return d
 
