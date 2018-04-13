@@ -1,24 +1,38 @@
 language: python
 
+python: 
+  - 3.6
+  - 2.7
+
+env:
+  - TOXENV=lint,build-py36,py36
+  - TOXENV=lint,build-py27,py27
+
 matrix:
-  include:
+  exclude:
     - python: 3.6
-      env: TOXENV=lint,build-py36,py36
+      env: TOXENV=lint,build-py27,py27
 
     - python: 2.7
-      env: TOXENV=lint,build-py27,py27
+      env: TOXENV=lint,build-py36,py36
 
 install:
   - pip install tox
 
 script:
   - tox
-deploy:
-  provider: pypi
-  user: freelancer
-  password: ${PYPI_PASSWORD}
-  on:
-    tags: true
+
+
+jobs:
+  include:
+    - stage: deploy
+      script: echo "Deploying to PyPI..."
+      deploy:
+        provider: pypi
+        user: freelancer
+        password: ${PYPI_PASSWORD}
+        on:
+          tags: true
 
 # To run TravisCI and build locally:
 # 1. Download Docker
