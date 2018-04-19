@@ -991,12 +991,10 @@ class TestProjects(unittest.TestCase):
         project_id = 2
         project_details = create_get_projects_project_details_object(
             full_description=True,
-            tracks=True
         )
 
         params = {
             'full_description': True,
-            'track_details': True,
         }
 
         self.session.session.get = Mock()
