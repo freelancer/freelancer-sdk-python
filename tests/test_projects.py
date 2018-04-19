@@ -10,7 +10,7 @@ from freelancersdk.resources.projects import (
     create_milestone_request, accept_milestone_request,
     reject_milestone_request, delete_milestone_request,
     get_jobs, get_milestones, get_milestone_by_id, update_track,
-    post_track, get_track_by_id
+    post_track, get_track_by_id, get_project_by_id
 )
 from freelancersdk.resources.projects.helpers import (
     create_budget_object, create_currency_object, create_job_object,
@@ -121,6 +121,24 @@ class FakeSearchProjectsGetResponse:
                     },
                 ],
             },
+        }
+
+
+class FakeGetProjectsByIdGetResponse:
+
+    status_code = 200
+
+    def json(self):
+        return {
+            'status': 'success',
+            'result': {
+                'id': 2,
+                'title': 'Sample title',
+                'tracks': [
+                    1,
+                    2
+                ]
+            }
         }
 
 
@@ -966,6 +984,27 @@ class TestProjects(unittest.TestCase):
         self.session.session.post.assert_called_once_with(
             'https://fake-fln.com/api/projects/0.1/tracks/',
             json=json_data,
+            verify=True
+        )
+    
+    def test_get_project_by_id(self):
+        project_id = 2
+        project_details = create_get_projects_project_details_object(
+            full_description=True,
+            tracks=True
+        )
+
+        params = {
+            'full_description': True,
+            'track_details': True,
+        }
+
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = FakeGetProjectsByIdGetResponse()
+        get_project_by_id(self.session, project_id, project_details)
+        self.session.session.get.assert_called_once_with(
+            'https://fake-fln.com/api/projects/0.1/projects/{}/'.format(project_id),
+            params=params,
             verify=True
         )
 
