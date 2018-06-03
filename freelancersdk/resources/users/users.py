@@ -157,7 +157,7 @@ def search_freelancers(
         search_freelancers_data.update(user_details)
     if compact:
         search_freelancers_data['compact'] = compact
-    
+
     search_freelancers_data['limit'] = limit
     search_freelancers_data['offset'] = offset
     
