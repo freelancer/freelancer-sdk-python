@@ -14,14 +14,17 @@ def sample_search_freelancers():
     oauth_token = os.environ.get('FLN_OAUTH_TOKEN')
     session = Session(oauth_token=oauth_token, url=url)
     user_details = create_get_users_details_object(
-        country=True,
-        profile_description=True
+        avatar=True,
+        reputation=True,
+        reputation_extra=True,
+        profile_description=True,
     )
     try:
         result = search_freelancers(
             session,
             username='CodeJunk',
-            user_details=user_details
+            user_details=user_details,
+            compact=False
         )
     except UsersNotFoundException as e:
         print('Error message: {}'.format(e.message))
@@ -33,4 +36,4 @@ def sample_search_freelancers():
 result = sample_search_freelancers()
 
 if result:
-    print('Found freelancers: {}'.format(len(result)))
+    print('Found freelancers: {}'.format(result))
