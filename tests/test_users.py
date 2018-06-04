@@ -79,7 +79,7 @@ class FakeSearchFreelancersGetResponse:
                     '100': {
                         'status': None,
                         'id': 100,
-                        'username': 'freelancer123'
+                        'username': 'creativedesign'
                     }
                 }
             }
@@ -333,7 +333,7 @@ class TestUsers(unittest.TestCase):
         self.session.session.get.return_value = FakeSearchFreelancersGetResponse()
 
         search_freelancers_data = {
-            'username': 'freelancer123',
+            'query': 'designer',
             'limit': 10,
             'offset': 0,
             'compact': True,
@@ -346,7 +346,7 @@ class TestUsers(unittest.TestCase):
 
         result = search_freelancers(
             self.session,
-            username='freelancer123',
+            query='designer',
             user_details=user_details
         )
 
