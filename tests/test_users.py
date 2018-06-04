@@ -95,7 +95,7 @@ class FakeGetUserByIdGetResponse:
             'status': 'success',
             'result': {
                 'id': 100,
-                'username': 'freelancer123'
+                'username': 'creativedesign'
             }
         }
 
