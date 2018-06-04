@@ -120,7 +120,7 @@ def search_freelancers(
                         session,
                         jobs=None, 
                         countries=None,
-                        username=None,
+                        query=None,
                         hourly_rate_min=None,
                         hourly_rate_max=None,
                         online_only=None,
@@ -137,8 +137,8 @@ def search_freelancers(
         search_freelancers_data['jobs[]'] = jobs
     if countries:
         search_freelancers_data['countries[]'] = countries
-    if username:
-        search_freelancers_data['username'] = username
+    if query:
+        search_freelancers_data['query'] = query
     if hourly_rate_min:
         search_freelancers_data['hourly_rate_min'] = hourly_rate_min
     if hourly_rate_max:
@@ -160,7 +160,6 @@ def search_freelancers(
 
     search_freelancers_data['limit'] = limit
     search_freelancers_data['offset'] = offset
-    
     response = make_get_request(
         session, 'users/directory',
         params_data=search_freelancers_data
