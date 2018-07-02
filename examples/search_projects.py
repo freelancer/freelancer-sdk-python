@@ -2,6 +2,11 @@ from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.exceptions import \
     ProjectsNotFoundException
+from freelancersdk.resources.projects.helpers import (
+    create_search_projects_filter,
+    create_get_projects_user_details_object,
+    create_get_projects_project_details_object,
+)
 import os
 
 
@@ -10,16 +15,19 @@ def sample_search_projects():
     oauth_token = os.environ.get('FLN_OAUTH_TOKEN')
     session = Session(oauth_token=oauth_token, url=url)
 
-    search_data = {
-        'query': 'logo',
-        'project_types': 'fixed',
-        'limit': 10,
-        'offset': 0,
-        'active_only': True,
-    }
+    query = 'Logo Design'
+    search_filter = create_search_projects_filter(
+        sort_field= 'time_updated',
+        or_search_query= True,
+    )
 
     try:
-        p = search_projects(session, **search_data)
+        p = search_projects(
+            session,
+            query=query,
+            search_filter=search_filter
+        )
+
     except ProjectsNotFoundException as e:
         print('Error message: {}'.format(e.message))
         print('Server response: {}'.format(e.error_code))
@@ -30,4 +38,4 @@ def sample_search_projects():
 
 p = sample_search_projects()
 if p:
-    print('Found projects: {}'.format(p('total_count')))
+    print('Found projects: {}'.format(p))
