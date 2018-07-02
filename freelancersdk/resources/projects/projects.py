@@ -180,17 +180,29 @@ def get_project_by_id(session, project_id, project_details=None, user_details=No
             message=json_data['message'], error_code=json_data['error_code']
         )
 
-def search_projects(session, query, project_types, limit, offset,
+def search_projects(session, 
+                    query,
+                    search_filter=None,
+                    project_details=None,
+                    user_details=None,
+                    limit=10,
+                    offset=0,
                     active_only=None):
     """
     Search for all projects
     """
     search_data = {
         'query': query,
-        'project_types': project_types,
         'limit': limit,
         'offset': offset,
     }
+    if search_filter:
+        search_data.update(search_filter)
+    if project_details:
+        search_data.update(project_details)
+    if user_details:
+        search_data.update(user_details)
+
     # GET /api/projects/0.1/projects/all/
     # GET /api/projects/0.1/projects/active/
     endpoint = 'projects/{}'.format('active' if active_only else 'all')

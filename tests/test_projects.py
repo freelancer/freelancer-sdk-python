@@ -17,7 +17,8 @@ from freelancersdk.resources.projects.helpers import (
     create_hourly_project_info_object, create_country_object,
     create_location_object, create_bid_object, create_get_projects_object,
     create_get_projects_project_details_object,
-    create_get_projects_user_details_object
+    create_get_projects_user_details_object,
+    create_search_projects_filter,
 )
 from freelancersdk.resources.projects.types import MilestoneReason
 try:
@@ -576,22 +577,44 @@ class TestProjects(unittest.TestCase):
             verify=True)
 
     def test_search_projects(self):
+        query = 'logo design'
+        limit = 3
+        offset = 0
         query_data = {
-            'query': 'logo',
-            'project_types': 'fixed',
-            'limit': 3,
-            'offset': 0,
-            'active_only': True,
+            'query': query,
+            'limit': limit,
+            'offset': offset,
         }
-
+        search_filter = create_search_projects_filter(
+            sort_field= 'time_updated',
+            or_search_query= True,
+        )
+        project_details = create_get_projects_project_details_object(
+            jobs=True,
+        )
+        user_details = create_get_projects_user_details_object(
+            basic=True,
+        )
+        query_data.update(search_filter)
+        query_data.update(project_details)
+        query_data.update(user_details)
         self.session.session.get = Mock()
         self.session.session.get.return_value = FakeSearchProjectsGetResponse()
-        p = search_projects(self.session, **query_data)
-        del(query_data['active_only'])
+        p = search_projects(
+            self.session,
+            query=query,
+            search_filter=search_filter,
+            project_details=project_details,
+            user_details=user_details,
+            limit=limit,
+            offset=offset,
+        )
+
         self.session.session.get.assert_called_once_with(
-            'https://fake-fln.com/api/projects/0.1/projects/active/',
+            'https://fake-fln.com/api/projects/0.1/projects/all/',
             params=query_data,
-            verify=True)
+            verify=True
+        )
         self.assertEquals(len(p['projects']), query_data['limit'])
 
     def test_place_project_bid(self):

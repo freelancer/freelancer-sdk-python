@@ -360,3 +360,66 @@ def create_get_projects_object(project_ids=None, owner_ids=None, seo_urls=None,
         p.update(offset=offset)
 
     return p
+
+
+def create_search_projects_filter(
+                                project_upgrades=None,
+                                contest_upgrades=None,
+                                or_search_query=None,
+                                project_types=None,
+                                include_contests=None,
+                                min_avg_price=None,
+                                max_avg_price=None,
+                                min_avg_hourly_rate=None,
+                                max_avg_hourly_rate=None,
+                                jobs=None,
+                                countries=None,
+                                languages=None,
+                                from_time=None,
+                                to_time=None,
+                                sort_field=None,
+                                reverse_sort=None,
+                                highlight_pre_tags=None,
+                                highlight_post_tags=None,
+                                ):
+    
+    p = {}
+
+    if project_upgrades:
+        p.update({'project_upgrades[]': project_upgrades})
+    if contest_upgrades:
+        p.update({'contest_upgrades[]': contest_upgrades})
+    if project_types:
+        p.update({'project_types[]': project_types})
+    if jobs:
+        p.update({'jobs[]': jobs})
+    if countries:
+        p.update({'countries[]': countries})
+    if languages:
+        p.update({'languages[]': languages})
+    if or_search_query:
+        p.update(or_search_query=or_search_query)
+    if min_avg_price:
+        p.update(min_avg_price=min_avg_price)
+    if max_avg_price:
+        p.update(max_avg_price=max_avg_price)
+    if min_avg_hourly_rate:
+        p.update(min_avg_hourly_rate=min_avg_hourly_rate)
+    if max_avg_hourly_rate:
+        p.update(max_avg_hourly_rate=max_avg_hourly_rate)
+    if include_contests:
+        p.update(include_contests=include_contests)
+    if to_time:
+        p.update(to_time=to_time)
+    if from_time:
+        p.update(from_time=from_time)
+    if sort_field:
+        p.update(sort_field=sort_field)
+    if reverse_sort:
+        p.update(reverse_sort=reverse_sort)
+    if highlight_pre_tags:
+        p.update(highlight_pre_tags=highlight_pre_tags)
+    if highlight_post_tags:
+        p.update(highlight_post_tags=highlight_post_tags)
+    
+    return p
