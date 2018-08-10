@@ -4,8 +4,6 @@ from freelancersdk.resources.projects.exceptions import \
     ProjectsNotFoundException
 from freelancersdk.resources.projects.helpers import (
     create_search_projects_filter,
-    create_get_projects_user_details_object,
-    create_get_projects_project_details_object,
 )
 import os
 
