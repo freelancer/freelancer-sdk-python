@@ -21,6 +21,7 @@ from freelancersdk.resources.projects.helpers import (
     create_search_projects_filter,
 )
 from freelancersdk.resources.projects.types import MilestoneReason
+from freelancersdk.resources.projects.exceptions import ProjectsNotFoundException
 try:
     from unittest.mock import Mock
 except ImportError:
@@ -166,7 +167,7 @@ class FakePlaceBidPostResponse:
 
 
 class FakeGetMilestonesGetResponse:
-    
+
     status_code = 200
 
     def json(self):
@@ -382,6 +383,7 @@ class FakeUpdateTrackPutResponse:
             "request_id": "97e0dbb4369a11e8bbcf22000afa00fd"
         }
 
+
 class FakePostTrackPostResponse:
     status_code = 200
 
@@ -459,9 +461,23 @@ class FakeGetJobsGetResponse:
         }
 
 
+class FakeErrorResponse:
+
+    status_code = 500
+
+    def json(self):
+        return {
+            'status': 'error',
+            'message': 'An error has occurred.',
+            'error_code': 'ExceptionCodes.UNKNOWN_ERROR',
+            'request_id': '3ab35843fb99cde325d819a4'
+        }
+
+
 class TestProjects(unittest.TestCase):
     def setUp(self):
-        self.session = Session(oauth_token='$sometoken', url='https://fake-fln.com')
+        self.session = Session(oauth_token='$sometoken',
+                               url='https://fake-fln.com')
 
     def tearDown(self):
         pass
@@ -586,8 +602,8 @@ class TestProjects(unittest.TestCase):
             'offset': offset,
         }
         search_filter = create_search_projects_filter(
-            sort_field= 'time_updated',
-            or_search_query= True,
+            sort_field='time_updated',
+            or_search_query=True,
         )
         project_details = create_get_projects_project_details_object(
             jobs=True,
@@ -679,7 +695,8 @@ class TestProjects(unittest.TestCase):
         response = get_milestones(self.session, **get_milestones_data)
 
         # Transforms the dictionary into the actual request sent by the function
-        get_milestones_data.update({'milestones[]': get_milestones_data['milestone_ids']})
+        get_milestones_data.update(
+            {'milestones[]': get_milestones_data['milestone_ids']})
         get_milestones_data.update(user_details)
         del(get_milestones_data['milestone_ids'])
         del(get_milestones_data['user_details'])
@@ -701,7 +718,8 @@ class TestProjects(unittest.TestCase):
         self.session.session.get.return_value = FakeGetMilestoneByIDGetResponse()
         get_milestone_by_id(self.session, milestone_id, user_details)
         self.session.session.get.assert_called_once_with(
-            'https://fake-fln.com/api/projects/0.1/milestones/{}/'.format(milestone_id),
+            'https://fake-fln.com/api/projects/0.1/milestones/{}/'.format(
+                milestone_id),
             params=user_details,
             verify=True
         )
@@ -952,7 +970,8 @@ class TestProjects(unittest.TestCase):
         params = {}
         track = get_track_by_id(self.session, track_id)
         self.session.session.get.assert_called_once_with(
-            'https://fake-fln.com/api/projects/0.1/tracks/{}/'.format(track_id),
+            'https://fake-fln.com/api/projects/0.1/tracks/{}/'.format(
+                track_id),
             params=params,
             verify=True
         )
@@ -974,9 +993,11 @@ class TestProjects(unittest.TestCase):
 
         self.session.session.put = Mock()
         self.session.session.put.return_value = FakeUpdateTrackPutResponse()
-        result = update_track(self.session, track_id, latitude, longitude, stop_tracking)
+        result = update_track(self.session, track_id,
+                              latitude, longitude, stop_tracking)
         self.session.session.put.assert_called_once_with(
-            'https://fake-fln.com/api/projects/0.1/tracks/{}/'.format(track_id),
+            'https://fake-fln.com/api/projects/0.1/tracks/{}/'.format(
+                track_id),
             json=json_data,
             data=None,
             headers=None,
@@ -985,7 +1006,7 @@ class TestProjects(unittest.TestCase):
         )
         self.assertEqual(result['latitude'], latitude)
         self.assertEqual(result['longitude'], longitude)
-    
+
     def test_post_track(self):
         user_id = 1
         project_id = 2
@@ -1009,7 +1030,7 @@ class TestProjects(unittest.TestCase):
             json=json_data,
             verify=True
         )
-    
+
     def test_get_project_by_id(self):
         project_id = 2
         project_details = create_get_projects_project_details_object(
@@ -1024,8 +1045,29 @@ class TestProjects(unittest.TestCase):
         self.session.session.get.return_value = FakeGetProjectsByIdGetResponse()
         get_project_by_id(self.session, project_id, project_details)
         self.session.session.get.assert_called_once_with(
-            'https://fake-fln.com/api/projects/0.1/projects/{}/'.format(project_id),
+            'https://fake-fln.com/api/projects/0.1/projects/{}/'.format(
+                project_id),
             params=params,
             verify=True
         )
 
+    def test_get_project_by_id_error(self):
+        project_id = 2
+        project_details = create_get_projects_project_details_object(
+            full_description=True,
+        )
+
+        params = {
+            'full_description': True,
+        }
+
+        response = FakeErrorResponse()
+        self.session.session.get = Mock()
+        self.session.session.get.return_value = response
+        with self.assertRaises(ProjectsNotFoundException) as cm:
+            get_project_by_id(self.session, project_id, project_details)
+
+        e = cm.exception
+        self.assertEqual(str(e), response.json()['message'])
+        self.assertEqual(e.request_id, response.json()['request_id'])
+        self.assertEqual(e.error_code, response.json()['error_code'])
