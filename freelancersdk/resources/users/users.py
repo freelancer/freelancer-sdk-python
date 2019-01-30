@@ -8,11 +8,12 @@ from freelancersdk.resources.users.exceptions import (
     ReputationsNotFoundException, PortfoliosNotFoundException
 )
 
+
 def get_self(session, user_details=None):
     """
     Get details about the currently authenticated user
     """
-    #Set compact to true
+    # Set compact to true
     if user_details:
         user_details['compact'] = True
     response = make_get_request(session, 'self', params_data=user_details)
@@ -22,7 +23,8 @@ def get_self(session, user_details=None):
     else:
         raise SelfNotRetrievedException(
             message=json_data['message'],
-            error_code=json_data['error_code']
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -32,14 +34,16 @@ def get_user_by_id(session, user_id, user_details=None):
     """
     if user_details:
         user_details['compact'] = True
-    response = make_get_request(session, 'users/{}'.format(user_id), params_data=user_details)
+    response = make_get_request(
+        session, 'users/{}'.format(user_id), params_data=user_details)
     json_data = response.json()
     if response.status_code == 200:
         return json_data['result']
     else:
         raise UserNotFoundException(
             message=json_data['message'],
-            error_code=json_data['error_code']
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -68,7 +72,9 @@ def add_user_jobs(session, job_ids):
         return json_data['status']
     else:
         raise UserJobsNotAddedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def set_user_jobs(session, job_ids):
@@ -85,7 +91,9 @@ def set_user_jobs(session, job_ids):
         return json_data['status']
     else:
         raise UserJobsNotSetException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def delete_user_jobs(session, job_ids):
@@ -101,7 +109,10 @@ def delete_user_jobs(session, job_ids):
         return json_data['status']
     else:
         raise UserJobsNotDeletedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
+
 
 def get_users(session, query):
     """
@@ -114,24 +125,27 @@ def get_users(session, query):
         return json_data['result']
     else:
         raise UsersNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
+
 
 def search_freelancers(
-                        session,
-                        jobs=None, 
-                        countries=None,
-                        query=None,
-                        hourly_rate_min=None,
-                        hourly_rate_max=None,
-                        online_only=None,
-                        location_latitude=None,
-                        location_longitude=None,
-                        insignias=None,
-                        ratings=None,
-                        limit=10,
-                        offset=0,
-                        compact=True,
-                        user_details=None):
+        session,
+        jobs=None,
+        countries=None,
+        query=None,
+        hourly_rate_min=None,
+        hourly_rate_max=None,
+        online_only=None,
+        location_latitude=None,
+        location_longitude=None,
+        insignias=None,
+        ratings=None,
+        limit=10,
+        offset=0,
+        compact=True,
+        user_details=None):
     search_freelancers_data = {}
     if jobs:
         search_freelancers_data['jobs[]'] = jobs
@@ -169,7 +183,9 @@ def search_freelancers(
         return json_data['result']
     else:
         raise UsersNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -181,7 +197,7 @@ def get_reputations(session, user_ids, job_ids=[], role=None,
     query['role'] = role
     if reputation_details:
         query.update(reputation_details)
-    
+
     response = make_get_request(
         session, 'reputations',
         params_data=query
@@ -191,14 +207,16 @@ def get_reputations(session, user_ids, job_ids=[], role=None,
         return json_data['result']
     else:
         raise ReputationsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
 def get_portfolios(session, user_ids, limit=10, offset=0):
     query = {'users[]': user_ids}
 
-    # Portfolio limits are counted per user. e.a. having 
+    # Portfolio limits are counted per user. e.a. having
     # a limit of 10 gives a max of 20 entries for 2 users
 
     query['limit'] = limit
@@ -212,6 +230,7 @@ def get_portfolios(session, user_ids, limit=10, offset=0):
         return json_data['result']
     else:
         raise PortfoliosNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
-    

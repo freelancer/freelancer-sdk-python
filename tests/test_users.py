@@ -7,6 +7,7 @@ from freelancersdk.resources.users import (
     get_users, get_self_user_id, get_self, search_freelancers,
     get_user_by_id, get_reputations, get_portfolios
 )
+from freelancersdk.resources.users.exceptions import PortfoliosNotFoundException
 try:
     from unittest.mock import Mock
 except ImportError:
@@ -195,6 +196,19 @@ class FakeGetPortfoliosGetResponse:
         }
 
 
+class FakeErrorResponse:
+
+    status_code = 500
+
+    def json(self):
+        return {
+            'status': 'error',
+            'message': 'An error has occurred.',
+            'error_code': 'ExceptionCodes.UNKNOWN_ERROR',
+            'request_id': '3ab35843fb99cde325d819a4'
+        }
+
+
 class TestUsers(unittest.TestCase):
     def setUp(self):
         self.session = Session(
@@ -224,7 +238,7 @@ class TestUsers(unittest.TestCase):
             json=user_jobs_data,
             verify=True)
         self.assertEquals(p, 'success')
-    
+
     def test_get_self(self):
         self.session.session.get = Mock()
         self.session.session.get.return_value = FakeGetSelfGetResponse()
@@ -241,7 +255,6 @@ class TestUsers(unittest.TestCase):
             verify=True
         )
 
-
     def test_get_self_user_id(self):
         self.session.session.get = Mock()
         self.session.session.get.return_value = FakeGetSelfUserIdGetResponse()
@@ -250,7 +263,6 @@ class TestUsers(unittest.TestCase):
         self.assertTrue(self.session.session.get.called)
 
         self.assertEqual(100, result)
-    
 
     def test_get_user_by_id(self):
         self.session.session.get = Mock()
@@ -266,7 +278,6 @@ class TestUsers(unittest.TestCase):
             params=user_details,
             verify=True
         )
-
 
     def test_set_user_jobs(self):
         user_jobs_data = {
@@ -355,12 +366,12 @@ class TestUsers(unittest.TestCase):
             params=search_freelancers_data,
             verify=True
         )
-    
+
     def test_get_reputations(self):
         self.session.session.get = Mock()
         self.session.session.get.return_value = FakeGetReputationsGetResponse()
 
-        user_ids = [1,2,3]
+        user_ids = [1, 2, 3]
         role = 'freelancer'
         reputation_details = {
             'job_history': True,
@@ -376,9 +387,9 @@ class TestUsers(unittest.TestCase):
         get_reputations_data.update(reputation_details)
         result = get_reputations(
             self.session,
-            user_ids = user_ids,
-            role = role,
-            reputation_details = reputation_details
+            user_ids=user_ids,
+            role=role,
+            reputation_details=reputation_details
         )
 
         self.session.session.get.assert_called_once_with(
@@ -399,7 +410,6 @@ class TestUsers(unittest.TestCase):
             'limit': limit,
             'offset': 0
         }
-        
 
         result = get_portfolios(self.session, user_ids, limit)
         self.session.session.get.assert_called_once_with(
@@ -409,3 +419,23 @@ class TestUsers(unittest.TestCase):
         )
         self.assertEqual(len(result['portfolios']), 1)
         self.assertEqual(len(result['portfolios']['1']), 2)
+
+    def test_get_portfolios_failure(self):
+        self.session.session.get = Mock()
+        response = FakeErrorResponse()
+        self.session.session.get.return_value = response
+        user_ids = [1]
+        limit = 10
+
+        get_reputations_data = {
+            'users[]': user_ids,
+            'limit': limit,
+            'offset': 0
+        }
+
+        with self.assertRaises(PortfoliosNotFoundException) as cm:
+            result = get_portfolios(self.session, user_ids, limit)
+        e = cm.exception
+        self.assertEqual(str(e), response.json()['message'])
+        self.assertEqual(e.request_id, response.json()['request_id'])
+        self.assertEqual(e.error_code, response.json()['error_code'])
