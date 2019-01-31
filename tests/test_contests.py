@@ -1,5 +1,6 @@
 from freelancersdk.session import Session
 from freelancersdk.resources.contests.contests import create_contest
+from freelancersdk.resources.contests.exceptions import ContestNotCreatedException
 try:
     from unittest.mock import Mock
 except ImportError:
@@ -45,6 +46,19 @@ class FakeCreateContestPostResponse:
         }
 
 
+class FakeErrorResponse:
+
+    status_code = 500
+
+    def json(self):
+        return {
+            'status': 'error',
+            'message': 'An error has occurred.',
+            'error_code': 'ExceptionCodes.UNKNOWN_ERROR',
+            'request_id': '3ab35843fb99cde325d819a4'
+        }
+
+
 class TestContest(unittest.TestCase):
     def setUp(self):
         self.session = Session(oauth_token='$sometoken',
@@ -86,3 +100,28 @@ class TestContest(unittest.TestCase):
         self.assertEquals(c.type, contest_data['type'])
         self.assertEquals(c.duration, contest_data['duration'])
         self.assertEquals(c.prize, contest_data['prize'])
+
+    def test_create_contest_fail(self):
+        contest_data = {
+            'title': 'Design a logo',
+            'description': 'I need a logo for my company',
+            'type': 'freemium',
+            'duration': 7,
+            'job_ids': [
+                1,
+                2,
+            ],
+            'currency_id': 1,
+            'prize': 100,
+        }
+
+        response = FakeErrorResponse()
+        self.session.session.post = Mock()
+        self.session.session.post.return_value = response
+
+        with self.assertRaises(ContestNotCreatedException) as cm:
+            c = create_contest(self.session, **contest_data)
+        e = cm.exception
+        self.assertEqual(str(e), response.json()['message'])
+        self.assertEqual(e.request_id, response.json()['request_id'])
+        self.assertEqual(e.error_code, response.json()['error_code'])
