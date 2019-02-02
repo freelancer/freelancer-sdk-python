@@ -36,7 +36,8 @@ def create_thread(session, member_ids, context_type, context, message):
         return Thread(json_data['result'])
     else:
         raise ThreadNotCreatedException(message=json_data['message'],
-                                        error_code=json_data['error_code'])
+                                        error_code=json_data['error_code'],
+                                        request_id=json_data['request_id'])
 
 
 def create_project_thread(session, member_ids, project_id, message):
@@ -66,7 +67,8 @@ def post_message(session, thread_id, message):
         return Message(json_data['result'])
     else:
         raise MessageNotCreatedException(message=json_data['message'],
-                                         error_code=json_data['error_code'])
+                                         error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'])
 
 
 def post_attachment(session, thread_id, attachments):
@@ -91,7 +93,8 @@ def post_attachment(session, thread_id, attachments):
         return Message(json_data['result'])
     else:
         raise MessageNotCreatedException(message=json_data['message'],
-                                         error_code=json_data['error_code'])
+                                         error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'])
 
 
 def get_messages(session, query, limit=10, offset=0):
@@ -100,7 +103,7 @@ def get_messages(session, query, limit=10, offset=0):
     """
     query['limit'] = limit
     query['offset'] = offset
-    
+
     # GET /api/messages/0.1/messages
     response = make_get_request(session, 'messages', params_data=query)
     json_data = response.json()
@@ -109,7 +112,8 @@ def get_messages(session, query, limit=10, offset=0):
     else:
         raise MessagesNotFoundException(
             message=json_data['message'],
-            error_code=json_data['error_code']
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -140,7 +144,8 @@ def search_messages(session, thread_id, query, limit=20,
     else:
         raise MessagesNotFoundException(
             message=json_data['message'],
-            error_code=json_data['error_code']
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -156,5 +161,6 @@ def get_threads(session, query):
     else:
         raise ThreadsNotFoundException(
             message=json_data['message'],
-            error_code=json_data['error_code']
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )

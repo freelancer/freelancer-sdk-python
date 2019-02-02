@@ -7,6 +7,8 @@ from freelancersdk.resources.messages.helpers import (
     create_attachment, create_get_threads_object, create_get_threads_details_object,
     create_get_messages_object
 )
+
+from freelancersdk.resources.messages.exceptions import MessageNotCreatedException
 try:
     from unittest.mock import Mock
 except ImportError:
@@ -164,6 +166,19 @@ class FakeGetThreadsGetResponse:
         }
 
 
+class FakeErrorResponse:
+
+    status_code = 500
+
+    def json(self):
+        return {
+            'status': 'error',
+            'message': 'An error has occurred.',
+            'error_code': 'ExceptionCodes.UNKNOWN_ERROR',
+            'request_id': '3ab35843fb99cde325d819a4'
+        }
+
+
 class TestMessages(unittest.TestCase):
     def setUp(self):
         self.session = Session(oauth_token='$sometoken',
@@ -204,10 +219,9 @@ class TestMessages(unittest.TestCase):
             verify=True)
         self.assertEquals(t.thread['context']['id'], thread_data['project_id'])
         self.assertEquals(t.thread['context']['type'], 'project')
-    
+
     def test_get_messages(self):
         thread_ids = [1]
-
 
         query = create_get_messages_object(
             threads=thread_ids,
@@ -223,7 +237,7 @@ class TestMessages(unittest.TestCase):
             params=query,
             verify=True
         )
-        self.assertEquals(len(response['messages']),2)
+        self.assertEquals(len(response['messages']), 2)
 
     def test_search_messages(self):
         query = {
@@ -246,8 +260,8 @@ class TestMessages(unittest.TestCase):
 
     def test_get_threads(self):
         query = create_get_threads_object(
-            threads = [1],
-            threads_details = create_get_threads_details_object(
+            threads=[1],
+            threads_details=create_get_threads_details_object(
                 message_count=1,
                 user_details=True
             )
@@ -264,7 +278,6 @@ class TestMessages(unittest.TestCase):
         )
         self.assertEquals(len(response['threads']), 1)
         self.assertEquals(response['threads'][0]['thread']['id'], 100)
-        
 
     def test_post_message(self):
         message_data = {
@@ -329,3 +342,26 @@ class TestMessages(unittest.TestCase):
             verify=True)
         self.assertEquals(m.thread_id, message_data['thread_id'])
         self.assertTrue(getattr(m, 'attachments'))
+
+    def test_post_attachment_fail(self):
+        file_object = {}
+        message_data = {
+            'thread_id': 301,
+            'attachments': [
+                create_attachment(file_object, 'file.txt'),
+            ],
+        }
+
+        response = FakeErrorResponse()
+
+        self.session.session.post = Mock()
+        self.session.session.post.return_value = \
+            response
+
+        with self.assertRaises(MessageNotCreatedException) as cm:
+            post_attachment(self.session, **message_data)
+
+        e = cm.exception
+        self.assertEqual(str(e), response.json()['message'])
+        self.assertEqual(e.request_id, response.json()['request_id'])
+        self.assertEqual(e.error_code, response.json()['error_code'])
