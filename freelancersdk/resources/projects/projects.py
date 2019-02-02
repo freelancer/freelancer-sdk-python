@@ -58,6 +58,7 @@ def create_project(session, title, description,
     else:
         raise ProjectNotCreatedException(message=json_data['message'],
                                          error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'],
                                          )
 
 
@@ -86,6 +87,7 @@ def create_hourly_project(session, title, description,
     else:
         raise ProjectNotCreatedException(message=json_data['message'],
                                          error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'],
                                          )
 
 
@@ -114,6 +116,7 @@ def create_local_project(session, title, description,
     else:
         raise ProjectNotCreatedException(message=json_data['message'],
                                          error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'],
                                          )
 
 
@@ -144,6 +147,7 @@ def create_hireme_project(session, title, description,
     else:
         raise ProjectNotCreatedException(message=json_data['message'],
                                          error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'],
                                          )
 
 
@@ -158,7 +162,9 @@ def get_projects(session, query):
         return json_data['result']
     else:
         raise ProjectsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def get_project_by_id(session, project_id, project_details=None, user_details=None):
@@ -171,16 +177,20 @@ def get_project_by_id(session, project_id, project_details=None, user_details=No
         query.update(project_details)
     if user_details:
         query.update(user_details)
-    response = make_get_request(session, 'projects/{}'.format(project_id), params_data=query)
+    response = make_get_request(
+        session, 'projects/{}'.format(project_id), params_data=query)
     json_data = response.json()
     if response.status_code == 200:
         return json_data['result']
     else:
         raise ProjectsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
-def search_projects(session, 
+
+def search_projects(session,
                     query,
                     search_filter=None,
                     project_details=None,
@@ -212,7 +222,9 @@ def search_projects(session,
         return json_data['result']
     else:
         raise ProjectsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def place_project_bid(session, project_id, bidder_id, description, amount,
@@ -236,7 +248,8 @@ def place_project_bid(session, project_id, bidder_id, description, amount,
         return Bid(bid_data)
     else:
         raise BidNotPlacedException(message=json_data['message'],
-                                    error_code=json_data['error_code'])
+                                    error_code=json_data['error_code'],
+                                    request_id=json_data['request_id'])
 
 
 def get_bids(session, project_ids=[], bid_ids=[], limit=10, offset=0):
@@ -257,7 +270,8 @@ def get_bids(session, project_ids=[], bid_ids=[], limit=10, offset=0):
         return json_data['result']
     else:
         raise BidsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'], error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -279,13 +293,16 @@ def get_milestones(session, project_ids=[], milestone_ids=[], user_details=None,
 
     # GET /api/projects/0.1/milestones/
 
-    response = make_get_request(session, 'milestones', params_data=get_milestones_data)
+    response = make_get_request(
+        session, 'milestones', params_data=get_milestones_data)
     json_data = response.json()
     if response.status_code == 200:
         return json_data['result']
     else:
         raise MilestonesNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -302,7 +319,9 @@ def get_milestone_by_id(session, milestone_id, user_details=None):
         return json_data['result']
     else:
         raise MilestonesNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code']
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -327,7 +346,8 @@ def award_project_bid(session, bid_id):
         json_data = response.json()
         raise BidNotAwardedException(
             message=json_data['message'],
-            error_code=json_data['error_code']
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id']
         )
 
 
@@ -351,7 +371,8 @@ def revoke_project_bid(session, bid_id):
     else:
         json_data = response.json()
         raise BidNotRevokedException(message=json_data['message'],
-                                     error_code=json_data['error_code'])
+                                     error_code=json_data['error_code'],
+                                     request_id=json_data['request_id'])
 
 
 def accept_project_bid(session, bid_id):
@@ -374,7 +395,8 @@ def accept_project_bid(session, bid_id):
     else:
         json_data = response.json()
         raise BidNotAcceptedException(message=json_data['message'],
-                                      error_code=json_data['error_code'])
+                                      error_code=json_data['error_code'],
+                                      request_id=json_data['request_id'])
 
 
 def retract_project_bid(session, bid_id):
@@ -397,7 +419,8 @@ def retract_project_bid(session, bid_id):
     else:
         json_data = response.json()
         raise BidNotRetractedException(message=json_data['message'],
-                                       error_code=json_data['error_code'])
+                                       error_code=json_data['error_code'],
+                                       request_id=json_data['request_id'])
 
 
 def highlight_project_bid(session, bid_id):
@@ -420,7 +443,8 @@ def highlight_project_bid(session, bid_id):
     else:
         json_data = response.json()
         raise BidNotHighlightedException(message=json_data['message'],
-                                         error_code=json_data['error_code'])
+                                         error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'])
 
 
 def create_milestone_payment(session, project_id, bidder_id, amount,
@@ -444,7 +468,8 @@ def create_milestone_payment(session, project_id, bidder_id, amount,
         return Milestone(milestone_data)
     else:
         raise MilestoneNotCreatedException(message=json_data['message'],
-                                           error_code=json_data['error_code'])
+                                           error_code=json_data['error_code'],
+                                           request_id=json_data['request_id'])
 
 
 def post_track(session, user_id, project_id, latitude, longitude):
@@ -462,13 +487,14 @@ def post_track(session, user_id, project_id, latitude, longitude):
 
     # POST /api/projects/0.1/tracks/
     response = make_post_request(session, 'tracks',
-                                json_data=tracking_data)
+                                 json_data=tracking_data)
     json_data = response.json()
     if response.status_code == 200:
         return json_data['result']
     else:
         raise TrackNotCreatedException(message=json_data['message'],
-                                       error_code=json_data['error_code'])
+                                       error_code=json_data['error_code'],
+                                       request_id=json_data['request_id'])
 
 
 def update_track(session, track_id, latitude, longitude, stop_tracking=False):
@@ -480,11 +506,11 @@ def update_track(session, track_id, latitude, longitude, stop_tracking=False):
     tracking_data = {
         'track_point': {
             'latitude': latitude,
-            'longitude': longitude, 
+            'longitude': longitude,
         },
         'stop_tracking': stop_tracking
     }
-    
+
     # PUT /api/projects/0.1/tracks/{track_id}/
 
     response = make_put_request(session, 'tracks/{}'.format(track_id),
@@ -494,7 +520,8 @@ def update_track(session, track_id, latitude, longitude, stop_tracking=False):
         return json_data['result']
     else:
         raise TrackNotUpdatedException(message=json_data['message'],
-                                      error_code=json_data['error_code'])
+                                       error_code=json_data['error_code'],
+                                       request_id=json_data['request_id'])
 
 
 def get_track_by_id(session, track_id, track_point_limit=None, track_point_offset=None):
@@ -511,13 +538,15 @@ def get_track_by_id(session, track_id, track_point_limit=None, track_point_offse
     # GET /api/projects/0.1/tracks/{track_id}/
 
     response = make_get_request(session, 'tracks/{}'.format(track_id),
-                                                    params_data=tracking_data)
+                                params_data=tracking_data)
     json_data = response.json()
     if response.status_code == 200:
         return json_data['result']
     else:
         raise TrackNotFoundException(message=json_data['message'],
-                                      error_code=json_data['error_code'])
+                                     error_code=json_data['error_code'],
+                                     request_id=json_data['request_id'])
+
 
 def release_milestone_payment(session, milestone_id, amount):
     """
@@ -538,7 +567,8 @@ def release_milestone_payment(session, milestone_id, amount):
         return json_data['status']
     else:
         raise MilestoneNotReleasedException(message=json_data['message'],
-                                            error_code=json_data['error_code'])
+                                            error_code=json_data['error_code'],
+                                            request_id=json_data['request_id'])
 
 
 def request_release_milestone_payment(session, milestone_id):
@@ -556,7 +586,9 @@ def request_release_milestone_payment(session, milestone_id):
         return json_data['status']
     else:
         raise MilestoneNotRequestedReleaseException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def cancel_milestone_payment(session, milestone_id):
@@ -574,7 +606,9 @@ def cancel_milestone_payment(session, milestone_id):
         return json_data['status']
     else:
         raise MilestoneNotCancelledException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def create_milestone_request(session, project_id, bid_id, description, amount):
@@ -596,7 +630,9 @@ def create_milestone_request(session, project_id, bid_id, description, amount):
         return MilestoneRequest(milestone_request_data)
     else:
         raise MilestoneRequestNotCreatedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def accept_milestone_request(session, milestone_request_id):
@@ -615,7 +651,9 @@ def accept_milestone_request(session, milestone_request_id):
         return json_data['status']
     else:
         raise MilestoneRequestNotAcceptedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def reject_milestone_request(session, milestone_request_id):
@@ -634,7 +672,9 @@ def reject_milestone_request(session, milestone_request_id):
         return json_data['status']
     else:
         raise MilestoneRequestNotRejectedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def delete_milestone_request(session, milestone_request_id):
@@ -653,7 +693,9 @@ def delete_milestone_request(session, milestone_request_id):
         return json_data['status']
     else:
         raise MilestoneRequestNotDeletedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def post_review(session, review):
@@ -667,7 +709,9 @@ def post_review(session, review):
         return json_data['status']
     else:
         raise ReviewNotPostedException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
 
 
 def get_jobs(session, job_ids, seo_details, lang):
@@ -686,4 +730,6 @@ def get_jobs(session, job_ids, seo_details, lang):
         return json_data['result']
     else:
         raise JobsNotFoundException(
-            message=json_data['message'], error_code=json_data['error_code'])
+            message=json_data['message'],
+            error_code=json_data['error_code'],
+            request_id=json_data['request_id'])
