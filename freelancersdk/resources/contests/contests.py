@@ -30,4 +30,5 @@ def create_contest(session, title, description, type, duration, job_ids, currenc
         return Contest(json_data['result'])
     else:
         raise ContestNotCreatedException(message=json_data['message'],
-                                         error_code=json_data['error_code'])
+                                         error_code=json_data['error_code'],
+                                         request_id=json_data['request_id'])
