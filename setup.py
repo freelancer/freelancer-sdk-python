@@ -19,7 +19,7 @@ setuptools.setup(
     author='Freelancer.com',
     url='https://github.com/freelancer/freelancer-sdk-python',
     author_email='api-support@freelancer.com',
-    version='0.1.19',
+    version='0.1.20',
     description='Offical Freelancer.com SDK',
     long_description=long_description,
     classifiers=[
