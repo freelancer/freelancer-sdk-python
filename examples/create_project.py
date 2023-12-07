@@ -8,7 +8,7 @@ from freelancersdk.exceptions import ProjectNotCreatedException
 import os
 
 
-# https://www.freelancer.com/api/docs/cases/creating_a_project
+# https://developers.freelancer.com/docs/use-cases/creating-a-project
 def sample_create_project():
     oauth_token = os.environ.get('FLN_OAUTH_TOKEN')
     url = os.environ.get('FLN_URL')

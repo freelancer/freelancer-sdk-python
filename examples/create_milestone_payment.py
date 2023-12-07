@@ -5,7 +5,7 @@ from freelancersdk.exceptions import MilestoneNotCreatedException
 import os
 
 
-# https://www.freelancer.com/api/docs/cases/creating_a_milestone
+# https://developers.freelancer.com/docs/projects/milestones#milestones-post
 def sample_create_milestone_payment():
 
     url = os.environ.get('FLN_URL')

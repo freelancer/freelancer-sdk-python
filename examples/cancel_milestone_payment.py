@@ -4,7 +4,7 @@ from freelancersdk.exceptions import MilestoneNotCancelledException
 import os
 
 
-# https://www.freelancer.com/api/docs/use-cases/milestone-actions
+# https://developers.freelancer.com/docs/projects/milestones#milestones-put
 def sample_cancel_milestone_payment():
     url = os.environ.get('FLN_URL')
     oauth_token = os.environ.get('FLN_OAUTH_TOKEN')
