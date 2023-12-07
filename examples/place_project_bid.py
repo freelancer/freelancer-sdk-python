@@ -6,7 +6,7 @@ from freelancersdk.exceptions import BidNotPlacedException
 import os
 
 
-# https://www.freelancer.com/api/docs/cases/creating_a_bid
+# https://developers.freelancer.com/docs/projects/bids#bids-post
 def sample_place_project_bid():
 
     url = os.environ.get('FLN_URL')
